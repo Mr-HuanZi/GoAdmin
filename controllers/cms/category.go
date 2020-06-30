@@ -1,0 +1,158 @@
+package cms
+
+import (
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
+	"go-admin/controllers/admin"
+	"go-admin/lib"
+	"go-admin/models/cms"
+	"strconv"
+	"time"
+)
+
+// 文章栏目
+type CategoryController struct {
+	admin.BaseController
+}
+
+// 栏目搜索结构体
+type CategoryListSearch struct {
+	Name  string
+	Limit int `valid:"Range(0, 1000)"` //分页每页显示的条数
+	Page  int `valid:"Min(1)"`         //当前页码
+}
+
+type CategoryListResult struct {
+	Total int64
+	List  []*cms.CategoryModel
+}
+
+// 栏目列表
+func (c *CategoryController) List() {
+	var (
+		CategoryListSearchS CategoryListSearch
+		Category            = new(cms.CategoryModel)
+		Err                 error
+		Data                = new(CategoryListResult)
+	)
+	_ = c.GetRequestJson(&CategoryListSearchS, false)
+	logs.Info(CategoryListSearchS)
+
+	//获取每页记录条数
+	if CategoryListSearchS.Limit <= 0 {
+		limit := beego.AppConfig.String("cms::limit")
+		CategoryListSearchS.Limit, Err = strconv.Atoi(limit)
+		if Err != nil {
+			logs.Error(Err)
+			c.Response(500, "", nil)
+		}
+	}
+
+	//页码
+	if CategoryListSearchS.Page <= 0 {
+		CategoryListSearchS.Page = 1
+	}
+
+	//计算页码偏移量
+	offset := (CategoryListSearchS.Page - 1) * CategoryListSearchS.Limit
+
+	o := orm.NewOrm()
+	qs := o.QueryTable(Category)
+
+	if CategoryListSearchS.Name != "" {
+		qs.Filter("name__contains", CategoryListSearchS.Name)
+	}
+
+	// 获取总条目
+	cnt, errCount := qs.Count()
+	if errCount != nil {
+		logs.Error(errCount)
+		c.Response(500, "", nil)
+	}
+	Data.Total = cnt
+
+	// 获取记录
+	_, Err = qs.Limit(CategoryListSearchS.Limit).Offset(offset).All(&Data.List)
+	if Err != nil {
+		logs.Error(Err)
+		c.Response(500, "", nil)
+	}
+	logs.Info(Data)
+	c.Response(200, "", Data)
+}
+
+// 新增栏目
+func (c *CategoryController) Add() {
+	var (
+		CategoryForm = new(cms.CategoryModel)
+		validateMsg  string
+		validateRes  bool
+	)
+	_ = c.GetRequestJson(&CategoryForm, true)
+	logs.Info(CategoryForm)
+
+	/* 表单字段验证 Start */
+	validateRes, validateMsg = lib.FormValidation(CategoryForm)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+
+	//初始化一些数据
+	if CategoryForm.Status == 0 {
+		CategoryForm.Status = 1
+	}
+	CategoryForm.CreateTime = time.Now().Unix()
+
+	o := orm.NewOrm()
+	//查找相同的别名
+	cnt, errCount := o.QueryTable(new(cms.CategoryModel)).Filter("alias", CategoryForm.Alias).Count()
+	if errCount != nil {
+		logs.Error(errCount)
+		c.Response(500, "", nil)
+	}
+	if cnt > 0 {
+		//有重复
+		c.Response(600, "", nil)
+	}
+	_, errInsert := o.Insert(CategoryForm)
+	if errInsert != nil {
+		logs.Error(errInsert)
+		c.Response(500, "", nil)
+	}
+	c.Response(200, "", nil)
+}
+
+// 修改栏目
+func (c *CategoryController) Modify() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		c.Response(500, getErr.Error(), nil)
+	}
+	var (
+		CategoryForm = new(cms.CategoryModel)
+		validateMsg  string
+		validateRes  bool
+	)
+	_ = c.GetRequestJson(&CategoryForm, true)
+	logs.Info(CategoryForm)
+
+	/* 表单字段验证 Start */
+	if id == 0 {
+		c.Response(304, "ID missing", nil)
+	}
+	validateRes, validateMsg = lib.FormValidation(CategoryForm)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+	CategoryForm.Id = id
+	num, err :=cms.UpdateCategory(CategoryForm)
+
+	if err != nil {
+		c.Response(500, "", nil)
+	} else {
+		c.Response(200, "", num)
+	}
+}

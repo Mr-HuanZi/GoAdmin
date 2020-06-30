@@ -1,0 +1,7 @@
+/.idea
+/vendor
+/logs
+
+.vs
+!.gitignore
+go-admin.exe
