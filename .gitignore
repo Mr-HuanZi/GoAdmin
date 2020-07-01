@@ -5,3 +5,4 @@
 .vs
 !.gitignore
 go-admin.exe
+go-admin.exe~
