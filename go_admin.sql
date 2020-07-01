@@ -11,7 +11,7 @@
  Target Server Version : 80012
  File Encoding         : 65001
 
- Date: 29/06/2020 06:14:28
+ Date: 02/07/2020 01:11:24
 */
 
 SET NAMES utf8mb4;
@@ -39,13 +39,14 @@ CREATE TABLE `admin_article`  (
   `source` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '来源',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `category_id`(`category_id`, `status`, `create_time`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin_article
 -- ----------------------------
-INSERT INTO `admin_article` VALUES (1, '文章修改测试', 1, '', '文章修改测试!文章修改测试!', 0, 0, 1592615447, '', 0, 0, 0, 0, '', '');
+INSERT INTO `admin_article` VALUES (1, '文章修改测试123', 1, '', '文章修改测试!文章修改测试!', 0, 0, 1593533739, '', 0, 0, 0, 0, '', '');
 INSERT INTO `admin_article` VALUES (2, '啊哈哈，又是测试而已啦', 1, '', '咿呀咿呀哟123', 1, 1588445813, 1588445813, '', 0, 0, 0, 0, '', '');
+INSERT INTO `admin_article` VALUES (4, '测试文章3', 1, '', '撒嘎嘎三个的撒给萨格撒旦干撒大哥5125', 1, 1593529879, 1593529879, '', 0, 0, 0, 0, '', '');
 
 -- ----------------------------
 -- Table structure for admin_category
@@ -86,10 +87,32 @@ CREATE TABLE `admin_category_articles`  (
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态,1:发布;0:不发布',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `term_taxonomy_id`(`category_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin_category_articles
+-- ----------------------------
+INSERT INTO `admin_category_articles` VALUES (1, 1, 1, 0, 0);
+
+-- ----------------------------
+-- Table structure for admin_rule
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_rule`;
+CREATE TABLE `admin_rule`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '规则名',
+  `rule` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '规则，一般是路由。如： /user/list',
+  `param` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '规则参数。如： limit=10&page=1',
+  `status` tinyint(1) UNSIGNED NULL DEFAULT 0 COMMENT '状态 1-启用 0-禁用',
+  `create_time` int(10) UNSIGNED NULL DEFAULT 0,
+  `soft` int(10) NULL DEFAULT 0 COMMENT '排序',
+  `open` tinyint(1) UNSIGNED NULL DEFAULT 0 COMMENT '是否对所有人员开放 1-是 0-否',
+  `add_staff` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '添加人员',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of admin_rule
 -- ----------------------------
 
 -- ----------------------------
@@ -132,7 +155,7 @@ CREATE TABLE `admin_user`  (
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
-INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1592615081, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
+INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1593623180, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
 INSERT INTO `admin_user` VALUES (2, 1, 0, 0, 0, '', 0, 0, 1587309956, 1587309956, 1, 'zhangdahuan', '###2af4f4a51b451d21005b6a6bc89d9c21', 'zhangdahuan', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 0, 0, '');
 
 SET FOREIGN_KEY_CHECKS = 1;
