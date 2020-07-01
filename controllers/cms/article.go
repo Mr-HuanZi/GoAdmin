@@ -1,13 +1,11 @@
 package cms
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/validation"
 	"go-admin/controllers/admin"
 	"go-admin/models/cms"
-	"strconv"
 	"time"
 )
 
@@ -36,27 +34,14 @@ func (c *ArticleController) List() {
 		Err                error
 		Article            = new(cms.ArticleModel)
 		Data               = new(ArticleListResult)
+		offset             int
 	)
 	_ = c.GetRequestJson(&ArticleListSearchS, false)
 	logs.Info(ArticleListSearchS)
 
-	//获取每页记录条数
-	if ArticleListSearchS.Limit <= 0 {
-		limit := beego.AppConfig.String("cms::limit")
-		ArticleListSearchS.Limit, Err = strconv.Atoi(limit)
-		if Err != nil {
-			logs.Error(Err)
-			c.Response(500, "", nil)
-		}
-	}
+	//获取每页记录条数, 页码, 计算页码偏移量
+	ArticleListSearchS.Limit, ArticleListSearchS.Page, offset = c.Paginate(ArticleListSearchS.Page, ArticleListSearchS.Limit)
 
-	//页码
-	if ArticleListSearchS.Page <= 0 {
-		ArticleListSearchS.Page = 1
-	}
-
-	//计算页码偏移量
-	offset := (ArticleListSearchS.Page - 1) * ArticleListSearchS.Limit
 	o := orm.NewOrm()
 	qs := o.QueryTable(Article)
 
@@ -122,7 +107,7 @@ func (c *ArticleController) Release() {
 
 	//确认栏目ID是否存在
 	cateOrm := orm.NewOrm()
-	cate := cms.CategoryModel{Id:ArticleModel.CategoryId}
+	cate := cms.CategoryModel{Id: ArticleModel.CategoryId}
 	cateReadErr := cateOrm.Read(&cate)
 
 	if cateReadErr == orm.ErrNoRows {
@@ -214,7 +199,7 @@ func (c *ArticleController) Modify() {
 
 	//确认栏目ID是否存在
 	cateOrm := orm.NewOrm()
-	cate := cms.CategoryModel{Id:ArticleForm.CategoryId}
+	cate := cms.CategoryModel{Id: ArticleForm.CategoryId}
 	cateReadErr := cateOrm.Read(&cate)
 
 	if cateReadErr == orm.ErrNoRows {

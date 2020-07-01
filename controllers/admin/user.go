@@ -2,12 +2,10 @@ package admin
 
 import (
 	"fmt"
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"go-admin/lib"
 	"go-admin/models/admin"
-	"strconv"
 	"time"
 )
 
@@ -17,46 +15,33 @@ type UserController struct {
 }
 
 type SearchForm struct {
-	Limit int
-	Page int
-	Username string
+	Limit    int    `form:"limit"`
+	Page     int    `form:"page"`
+	Username string `form:"-"`
 	Nickname string
 }
 
 type ListResult struct {
 	Total int64
-	List []*admin.UserModel
+	List  []*admin.UserModel
 }
 
 // 用户列表
 func (c *UserController) List() {
 	var (
 		SearchFormInstance SearchForm
-		Data = new(ListResult)
-		UserModel = new (admin.UserModel)
-		Err error
+		Data               = new(ListResult)
+		UserModel          = new(admin.UserModel)
+		Err                error
+		offset             int
 	)
 
 	_ = c.GetRequestJson(&SearchFormInstance, false)
 	logs.Info(SearchFormInstance)
 
-	//获取每页记录条数
-	if SearchFormInstance.Limit <= 0 {
-		limit := beego.AppConfig.String("cms::limit")
-		SearchFormInstance.Limit, Err = strconv.Atoi(limit)
-		if Err != nil {
-			logs.Error(Err)
-			c.Response(500, "", nil)
-		}
-	}
+	//获取每页记录条数, 页码, 计算页码偏移量
+	SearchFormInstance.Limit, SearchFormInstance.Page, offset = c.Paginate(SearchFormInstance.Page, SearchFormInstance.Limit)
 
-	//页码
-	if SearchFormInstance.Page <= 0 {
-		SearchFormInstance.Page = 1
-	}
-
-	//计算页码偏移量
-	offset := (SearchFormInstance.Page - 1) * SearchFormInstance.Limit
 	o := orm.NewOrm()
 	qs := o.QueryTable(UserModel)
 
@@ -91,9 +76,9 @@ func (c *UserController) List() {
 // 创建用户(管理员)
 func (c *UserController) CreateUser() {
 	var (
-		UserForm admin.UserModel
-		validateMsg  string
-		validateRes  bool
+		UserForm    admin.UserModel
+		validateMsg string
+		validateRes bool
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
@@ -124,17 +109,17 @@ func (c *UserController) CreateUser() {
 
 }
 
-func  (c *UserController) Modify() {
-	id , getErr := c.GetInt64("id")
+func (c *UserController) Modify() {
+	id, getErr := c.GetInt64("id")
 	if getErr != nil {
 		logs.Error(getErr.Error())
 		c.Response(500, getErr.Error(), nil)
 	}
 
 	var (
-		UserForm admin.UserModel
-		validateMsg  string
-		validateRes  bool
+		UserForm    admin.UserModel
+		validateMsg string
+		validateRes bool
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)

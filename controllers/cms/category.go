@@ -1,13 +1,11 @@
 package cms
 
 import (
-	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"go-admin/controllers/admin"
 	"go-admin/lib"
 	"go-admin/models/cms"
-	"strconv"
 	"time"
 )
 
@@ -35,27 +33,13 @@ func (c *CategoryController) List() {
 		Category            = new(cms.CategoryModel)
 		Err                 error
 		Data                = new(CategoryListResult)
+		offset              int
 	)
 	_ = c.GetRequestJson(&CategoryListSearchS, false)
 	logs.Info(CategoryListSearchS)
 
-	//获取每页记录条数
-	if CategoryListSearchS.Limit <= 0 {
-		limit := beego.AppConfig.String("cms::limit")
-		CategoryListSearchS.Limit, Err = strconv.Atoi(limit)
-		if Err != nil {
-			logs.Error(Err)
-			c.Response(500, "", nil)
-		}
-	}
-
-	//页码
-	if CategoryListSearchS.Page <= 0 {
-		CategoryListSearchS.Page = 1
-	}
-
-	//计算页码偏移量
-	offset := (CategoryListSearchS.Page - 1) * CategoryListSearchS.Limit
+	//获取每页记录条数, 页码, 计算页码偏移量
+	CategoryListSearchS.Limit, CategoryListSearchS.Page, offset = c.Paginate(CategoryListSearchS.Page, CategoryListSearchS.Limit)
 
 	o := orm.NewOrm()
 	qs := o.QueryTable(Category)
@@ -148,7 +132,7 @@ func (c *CategoryController) Modify() {
 	}
 	/* 表单字段验证 End */
 	CategoryForm.Id = id
-	num, err :=cms.UpdateCategory(CategoryForm)
+	num, err := cms.UpdateCategory(CategoryForm)
 
 	if err != nil {
 		c.Response(500, "", nil)

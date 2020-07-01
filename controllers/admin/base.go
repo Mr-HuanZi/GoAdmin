@@ -8,6 +8,7 @@ import (
 	"go-admin/lib/jwt"
 	"go-admin/lib/status_code"
 	"go-admin/models/admin"
+	"strconv"
 	"strings"
 )
 
@@ -113,4 +114,39 @@ func (base *BaseController) getLoginUser(uid int64) error {
 		base.UserRoot = false
 	}
 	return nil
+}
+
+// 获取limit的默认值
+func (base *BaseController) LimitDef(l int) int {
+	var Err error
+	if l <= 0 {
+		limit := beego.AppConfig.String("cms::limit")
+		l, Err = strconv.Atoi(limit)
+		if Err != nil {
+			logs.Error(Err)
+			base.Response(500, "", nil)
+		}
+	}
+	return l
+}
+
+// 页码默认值
+func (base *BaseController) PageDef(p int) int {
+	if p <= 0 {
+		return 1
+	}
+	return p
+}
+
+// 获取页码偏移量
+func (base *BaseController) GetOffset(p int, l int) int {
+	return (p - 1) * l
+}
+
+// 计算页码偏移量并且检查limit和page
+func (base *BaseController) Paginate(p int, l int) (int, int, int) {
+	p = base.PageDef(p)
+	l = base.LimitDef(l)
+	offset := base.GetOffset(p, l)
+	return l, p, offset
 }
