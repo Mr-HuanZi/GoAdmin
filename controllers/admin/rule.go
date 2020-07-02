@@ -1,9 +1,12 @@
 package admin
 
 import (
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"go-admin/lib"
 	"go-admin/models/admin"
+	"time"
 )
 
 // 权限规则管理
@@ -48,4 +51,86 @@ func (c *RuleController) List() {
 	}
 	logs.Info(listResult)
 	c.Response(200, "", listResult)
+}
+
+func (c *RuleController) Add() {
+	var (
+		RuleForm    admin.RuleModel
+		validateMsg string
+		validateRes bool
+	)
+
+	_ = c.GetRequestJson(&RuleForm, true)
+	logs.Info(RuleForm)
+
+	/* 表单字段验证 Start */
+	validateRes, validateMsg = lib.FormValidation(RuleForm)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+
+	// 初始化一些字段
+	RuleForm.CreateTime = time.Now().Unix()
+	RuleForm.AddStaff = c.ThatUser.Id
+
+	// 写入数据
+	o := orm.NewOrm()
+	_, err := o.Insert(RuleForm)
+	if err != nil {
+		logs.Error(err)
+		c.Response(500, "", nil)
+	}
+	c.Response(200, "", nil)
+}
+
+func (c *RuleController) Modify() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	var (
+		RuleForm    admin.RuleModel
+		validateMsg string
+		validateRes bool
+	)
+
+	_ = c.GetRequestJson(&RuleForm, true)
+	logs.Info(RuleForm)
+
+	/* 表单字段验证 Start */
+	if id == 0 {
+		c.Response(304, "ID missing", nil)
+	}
+	validateRes, validateMsg = lib.FormValidation(RuleForm)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+	o := orm.NewOrm()
+	// 查找文章
+	Rule := admin.RuleModel{Id: id}
+	err := o.Read(&Rule)
+
+	if err == orm.ErrNoRows {
+		logs.Error("查询不到")
+		c.Response(602, "", nil)
+	} else if err == orm.ErrMissPK {
+		logs.Error("找不到主键")
+		c.Response(401, "", nil)
+	}
+
+	// 不能被修改的数据
+	RuleForm.CreateTime = Rule.CreateTime
+
+	//保存数据
+	UpdateNum, UpdateErr := o.Update(RuleForm)
+	if UpdateErr != nil {
+		logs.Error(err)
+		c.Response(500, "", nil)
+	}
+	fmt.Println(UpdateNum)
+	c.Response(200, "", nil)
 }

@@ -7,13 +7,13 @@ import (
 
 type RuleModel struct {
 	Id         int    `orm:"pk"`
-	Name       string // 规则名
-	Rule       string // 规则，一般是路由。如： /user/list
+	Name       string `valid:"Required"` // 规则名
+	Rule       string `valid:"Required"` // 规则，一般是路由。如： /user/list
 	Param      string // 规则参数。如： limit=10&page=1
-	Status     uint8  // 状态 1-启用 0-禁用
+	Status     uint8  `valid:"Range(0, 1)"` // 状态 1-启用 0-禁用
 	CreateTime int64
 	Soft       int   // 排序
-	Open       int8  // 是否对所有人员开放
+	Open       int8  `valid:"Range(0, 1)"` // 是否对所有人员开放
 	AddStaff   int64 // 添加人员
 }
 
