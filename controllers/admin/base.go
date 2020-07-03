@@ -24,6 +24,9 @@ var StatusCodeInstance status_code.StatusCode
 
 // 基类初始化方法，每次执行都会被调用
 func (base *BaseController) Prepare() {
+	// 日志开始
+	logs.Info("\r\n\r\n")
+	logs.Info(base.Ctx.Input.IP(), "["+base.Ctx.Input.Method()+"]", base.Ctx.Input.URL(), base.Ctx.Input.URI())
 	//验证登录
 	var checkLogin = true
 	var ruleExclude []string

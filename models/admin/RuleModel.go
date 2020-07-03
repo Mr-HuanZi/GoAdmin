@@ -10,7 +10,7 @@ type RuleModel struct {
 	Name       string `valid:"Required"` // 规则名
 	Rule       string `valid:"Required"` // 规则，一般是路由。如： /user/list
 	Param      string // 规则参数。如： limit=10&page=1
-	Status     uint8  `valid:"Range(0, 1)"` // 状态 1-启用 0-禁用
+	Status     int8   `valid:"Range(0, 1)"` // 状态 1-启用 0-禁用
 	CreateTime int64
 	Soft       int   // 排序
 	Open       int8  `valid:"Range(0, 1)"` // 是否对所有人员开放
@@ -23,6 +23,6 @@ func init() {
 }
 
 //自定义表名
-func (User *RuleModel) TableName() string {
+func (Rule *RuleModel) TableName() string {
 	return "rule"
 }

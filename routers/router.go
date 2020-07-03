@@ -33,6 +33,8 @@ func init() {
 		beego.NSRouter("/user/modify", &admin.UserController{}, "post:Modify"),
 		// 权限规则
 		beego.NSRouter("/rule/list", &admin.RuleController{}, "post:List"),
+		beego.NSRouter("/rule/add", &admin.RuleController{}, "post:Add"),
+		beego.NSRouter("/rule/modify", &admin.RuleController{}, "post:Modify"),
 	)
 
 	beego.AddNamespace(ns)
