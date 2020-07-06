@@ -11,7 +11,7 @@
  Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 06/07/2020 16:39:20
+ Date: 06/07/2020 17:55:06
 */
 
 SET NAMES utf8mb4;
@@ -47,6 +47,39 @@ CREATE TABLE `admin_article`  (
 INSERT INTO `admin_article` VALUES (1, '文章修改测试123', 1, '', '文章修改测试!文章修改测试!', 0, 0, 1593533739, '', 0, 0, 0, 0, '', '');
 INSERT INTO `admin_article` VALUES (2, '啊哈哈，又是测试而已啦', 1, '', '咿呀咿呀哟123', 1, 1588445813, 1588445813, '', 0, 0, 0, 0, '', '');
 INSERT INTO `admin_article` VALUES (4, '测试文章3', 1, '', '撒嘎嘎三个的撒给萨格撒旦干撒大哥5125', 1, 1593529879, 1593529879, '', 0, 0, 0, 0, '', '');
+
+-- ----------------------------
+-- Table structure for admin_auth_group
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_auth_group`;
+CREATE TABLE `admin_auth_group`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户组中文名称',
+  `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '组类型',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '描述信息',
+  `status` tinyint(2) NULL DEFAULT 1 COMMENT '用户组状态：为1正常，为0禁用,-1为删除',
+  `rules` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '用户组拥有的规则id，多个规则 , 隔开',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of admin_auth_group
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for admin_auth_group_access
+-- ----------------------------
+DROP TABLE IF EXISTS `admin_auth_group_access`;
+CREATE TABLE `admin_auth_group_access`  (
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL COMMENT '用户ID',
+  `group_id` int(11) NOT NULL COMMENT '用户组id',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Fixed;
+
+-- ----------------------------
+-- Records of admin_auth_group_access
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for admin_category
@@ -114,7 +147,7 @@ CREATE TABLE `admin_rule`  (
 -- ----------------------------
 -- Records of admin_rule
 -- ----------------------------
-INSERT INTO `admin_rule` VALUES (2, '测试权限', '/rule/list', '', 0, 1594006072, 0, 0, 1);
+INSERT INTO `admin_rule` VALUES (2, '规则列表', '/rule/list', '', 0, 1594006072, 0, 0, 0);
 INSERT INTO `admin_rule` VALUES (3, '测试权限', '/rule/add', '', 0, 1594024252, 0, 0, 1);
 
 -- ----------------------------
@@ -157,7 +190,7 @@ CREATE TABLE `admin_user`  (
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
-INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1594023720, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
+INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1594024960, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
 INSERT INTO `admin_user` VALUES (2, 1, 0, 0, 0, '', 0, 0, 1587309956, 1587309956, 1, 'zhangdahuan', '###2af4f4a51b451d21005b6a6bc89d9c21', 'zhangdahuan', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 0, 0, '');
 
 SET FOREIGN_KEY_CHECKS = 1;
