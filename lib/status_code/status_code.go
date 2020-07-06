@@ -67,6 +67,9 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 401: //主键丢失
 		S.Msg = "Primary key missing"
 		break
+	case 402: // 存在相同的记录
+		S.Msg = "There are the same records"
+		break
 	case 500: //系统错误
 		S.Msg = "System error"
 		break

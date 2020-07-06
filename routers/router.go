@@ -20,19 +20,19 @@ func init() {
 		beego.NSRouter("/login/test", &admin.LoginController{}, "post:Test"),
 		beego.NSRouter("/register", &admin.LoginController{}, "post:Register"),
 		// 文章
-		beego.NSRouter("/article/list", &cms.ArticleController{}, "post:List"),
+		beego.NSRouter("/article/list", &cms.ArticleController{}, "get,post:List"),
 		beego.NSRouter("/article/release", &cms.ArticleController{}, "post:Release"),
 		beego.NSRouter("/article/modify", &cms.ArticleController{}, "post:Modify"),
 		// 栏目
-		beego.NSRouter("/category/list", &cms.CategoryController{}, "post:List"),
+		beego.NSRouter("/category/list", &cms.CategoryController{}, "get,post:List"),
 		beego.NSRouter("/category/add", &cms.CategoryController{}, "post:Add"),
 		beego.NSRouter("/category/modify", &cms.CategoryController{}, "post:Modify"),
 		// 用户
-		beego.NSRouter("/user/list", &admin.UserController{}, "post:List"),
+		beego.NSRouter("/user/list", &admin.UserController{}, "get,post:List"),
 		beego.NSRouter("/user/create", &admin.UserController{}, "post:CreateUser"),
 		beego.NSRouter("/user/modify", &admin.UserController{}, "post:Modify"),
 		// 权限规则
-		beego.NSRouter("/rule/list", &admin.RuleController{}, "post:List"),
+		beego.NSRouter("/rule/list", &admin.RuleController{}, "get,post:List"),
 		beego.NSRouter("/rule/add", &admin.RuleController{}, "post:Add"),
 		beego.NSRouter("/rule/modify", &admin.RuleController{}, "post:Modify"),
 	)

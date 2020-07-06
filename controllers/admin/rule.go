@@ -63,20 +63,30 @@ func (c *RuleController) Add() {
 	_ = c.GetRequestJson(&RuleForm, true)
 	logs.Info(RuleForm)
 
+	o := orm.NewOrm()
 	/* 表单字段验证 Start */
 	validateRes, validateMsg = lib.FormValidation(RuleForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
+	}
+	// 检查重复项
+	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Count()
+	if ruleCountErr != nil {
+		logs.Error(ruleCountErr)
+		c.Response(500, ruleCountErr.Error(), nil)
+	}
+	if ruleCount >= 1 {
+		c.Response(402, "", nil)
 	}
 	/* 表单字段验证 End */
 
 	// 初始化一些字段
 	RuleForm.CreateTime = time.Now().Unix()
 	RuleForm.AddStaff = c.ThatUser.Id
+	RuleForm.Id = 0
 
 	// 写入数据
-	o := orm.NewOrm()
-	_, err := o.Insert(RuleForm)
+	_, err := o.Insert(&RuleForm)
 	if err != nil {
 		logs.Error(err)
 		c.Response(500, "", nil)
@@ -100,6 +110,7 @@ func (c *RuleController) Modify() {
 	_ = c.GetRequestJson(&RuleForm, true)
 	logs.Info(RuleForm)
 
+	o := orm.NewOrm()
 	/* 表单字段验证 Start */
 	if id == 0 {
 		c.Response(304, "ID missing", nil)
@@ -108,8 +119,16 @@ func (c *RuleController) Modify() {
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
+	// 检查相同的记录
+	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Exclude("id", id).Count()
+	if ruleCountErr != nil {
+		logs.Error(ruleCountErr)
+		c.Response(500, ruleCountErr.Error(), nil)
+	}
+	if ruleCount >= 1 {
+		c.Response(402, "", nil)
+	}
 	/* 表单字段验证 End */
-	o := orm.NewOrm()
 	// 查找文章
 	Rule := admin.RuleModel{Id: id}
 	err := o.Read(&Rule)
@@ -121,12 +140,12 @@ func (c *RuleController) Modify() {
 		logs.Error("找不到主键")
 		c.Response(401, "", nil)
 	}
-
 	// 不能被修改的数据
 	RuleForm.CreateTime = Rule.CreateTime
+	RuleForm.Id = Rule.Id // 保持ID不改变
 
 	//保存数据
-	UpdateNum, UpdateErr := o.Update(RuleForm)
+	UpdateNum, UpdateErr := o.Update(&RuleForm)
 	if UpdateErr != nil {
 		logs.Error(err)
 		c.Response(500, "", nil)

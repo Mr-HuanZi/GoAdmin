@@ -1,17 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 本地库
+ Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 80012
- Source Host           : localhost:9981
+ Source Server Version : 50726
+ Source Host           : localhost:3306
  Source Schema         : go_admin
 
  Target Server Type    : MySQL
- Target Server Version : 80012
+ Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 02/07/2020 01:11:24
+ Date: 06/07/2020 16:39:20
 */
 
 SET NAMES utf8mb4;
@@ -87,7 +87,7 @@ CREATE TABLE `admin_category_articles`  (
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态,1:发布;0:不发布',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `term_taxonomy_id`(`category_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin_category_articles
@@ -107,20 +107,22 @@ CREATE TABLE `admin_rule`  (
   `create_time` int(10) UNSIGNED NULL DEFAULT 0,
   `soft` int(10) NULL DEFAULT 0 COMMENT '排序',
   `open` tinyint(1) UNSIGNED NULL DEFAULT 0 COMMENT '是否对所有人员开放 1-是 0-否',
-  `add_staff` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '添加人员',
+  `add_staff` bigint(10) UNSIGNED NULL DEFAULT 0 COMMENT '添加人员',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin_rule
 -- ----------------------------
+INSERT INTO `admin_rule` VALUES (2, '测试权限', '/rule/list', '', 0, 1594006072, 0, 0, 1);
+INSERT INTO `admin_rule` VALUES (3, '测试权限', '/rule/add', '', 0, 1594024252, 0, 0, 1);
 
 -- ----------------------------
 -- Table structure for admin_user
 -- ----------------------------
 DROP TABLE IF EXISTS `admin_user`;
 CREATE TABLE `admin_user`  (
-  `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '用户类型;1:admin;2:会员',
   `sex` tinyint(2) NOT NULL DEFAULT 0 COMMENT '性别;0:保密,1:男,2:女',
   `birthday` int(11) NOT NULL DEFAULT 0 COMMENT '生日',
@@ -155,7 +157,7 @@ CREATE TABLE `admin_user`  (
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
-INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1593623180, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
+INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1594023720, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 1, 0, '');
 INSERT INTO `admin_user` VALUES (2, 1, 0, 0, 0, '', 0, 0, 1587309956, 1587309956, 1, 'zhangdahuan', '###2af4f4a51b451d21005b6a6bc89d9c21', 'zhangdahuan', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 0, 0, '');
 
 SET FOREIGN_KEY_CHECKS = 1;
