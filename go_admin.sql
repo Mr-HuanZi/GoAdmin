@@ -11,7 +11,7 @@
  Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 06/07/2020 17:55:06
+ Date: 08/07/2020 18:09:10
 */
 
 SET NAMES utf8mb4;
@@ -55,7 +55,6 @@ DROP TABLE IF EXISTS `admin_auth_group`;
 CREATE TABLE `admin_auth_group`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `title` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户组中文名称',
-  `type` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '组类型',
   `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '描述信息',
   `status` tinyint(2) NULL DEFAULT 1 COMMENT '用户组状态：为1正常，为0禁用,-1为删除',
   `rules` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '用户组拥有的规则id，多个规则 , 隔开',
@@ -72,8 +71,8 @@ CREATE TABLE `admin_auth_group`  (
 DROP TABLE IF EXISTS `admin_auth_group_access`;
 CREATE TABLE `admin_auth_group_access`  (
   `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL COMMENT '用户ID',
-  `group_id` int(11) NOT NULL COMMENT '用户组id',
+  `uid` bigint(20) UNSIGNED NOT NULL COMMENT '用户ID',
+  `group_id` int(11) UNSIGNED NOT NULL COMMENT '用户组id',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Fixed;
 
@@ -140,7 +139,7 @@ CREATE TABLE `admin_rule`  (
   `create_time` int(10) UNSIGNED NULL DEFAULT 0,
   `soft` int(10) NULL DEFAULT 0 COMMENT '排序',
   `open` tinyint(1) UNSIGNED NULL DEFAULT 0 COMMENT '是否对所有人员开放 1-是 0-否',
-  `add_staff` bigint(10) UNSIGNED NULL DEFAULT 0 COMMENT '添加人员',
+  `add_staff` bigint(20) UNSIGNED NULL DEFAULT 0 COMMENT '添加人员',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = MyISAM AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
