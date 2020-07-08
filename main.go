@@ -7,6 +7,7 @@ import (
 	"github.com/astaxie/beego/plugins/cors"
 	_ "github.com/go-sql-driver/mysql"
 	"go-admin/lib"
+	"go-admin/lib/rule"
 	_ "go-admin/routers"
 	"log"
 	"time"
@@ -36,6 +37,8 @@ func init() {
 		//如果设置，则允许共享身份验证凭据，例如cookie
 		AllowCredentials: true,
 	}))
+	// 初始化权限规则
+	initRule()
 }
 
 func main() {
@@ -78,4 +81,9 @@ func initLogsDriver() {
 		return
 	}
 	logs.Async() //日志异步
+}
+
+// 初始化权限规则
+func initRule() {
+	rule.Check()
 }
