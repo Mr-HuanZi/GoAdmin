@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"go-admin/lib/jwt"
+	"go-admin/lib/rule"
 	"go-admin/lib/status_code"
 	"go-admin/models/admin"
 	"strconv"
@@ -65,6 +66,9 @@ func (base *BaseController) Prepare() {
 			}
 		}
 	}
+
+	// 初始化权限规则
+	initRule()
 }
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
@@ -152,4 +156,9 @@ func (base *BaseController) Paginate(p int, l int) (int, int, int) {
 	l = base.LimitDef(l)
 	offset := base.GetOffset(p, l)
 	return l, p, offset
+}
+
+// 初始化权限规则
+func initRule() {
+	rule.Check()
 }

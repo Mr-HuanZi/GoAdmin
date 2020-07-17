@@ -10,7 +10,7 @@ type AuthGroupModel struct {
 	Title       string
 	Description string
 	Status      int8
-	rules       string
+	Rules       string
 }
 
 func init() {

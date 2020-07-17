@@ -1,38 +1,45 @@
 package rule
 
 import (
+	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"go-admin/models/admin"
+	"strings"
 )
 
 var (
-	AUTH_ON           bool
-	AUTH_GROUP        admin.AuthGroupModel       // 权限组表
-	AUTH_GROUP_ACCESS admin.AuthGroupAccessModel // 权限组-用户关联表
-	AUTH_RULE         admin.RuleModel            // 权限规则表
-	AUTH_USER         admin.UserModel            // 用户表
+	AuthON          bool
+	AuthGroup       admin.AuthGroupModel       // 权限组表
+	AuthGroupAccess admin.AuthGroupAccessModel // 权限组-用户关联表
+	AuthRule        admin.RuleModel            // 权限规则表
+	AuthUser        admin.UserModel            // 用户表
 )
 
 func init() {
 	var confErr error
-	AUTH_ON, confErr = beego.AppConfig.Bool("rule::AUTH_ON")
+	AuthON, confErr = beego.AppConfig.Bool("rule::AUTH_ON")
 	if confErr != nil {
 		logs.Error(confErr)
-		AUTH_ON = false // 如果获取配置失败，则将开关设置为“关”
+		AuthON = false // 如果获取配置失败，则将开关设置为“关”
 	}
 }
 
 // 验证权限
-func Check() {
-	logs.Info(AUTH_GROUP)
+func Check() bool {
+	if !AuthON {
+		return true
+	}
+_:
+	getUserRuleList(1)
+	return true
 }
 
 // 根据用户id获取用户组,返回值为数组
-func getGroup(uid int64) []int {
+func getGroup(uid int64, groupData interface{}) (int64, error) {
 	var (
-		groupData []int
+		queryNum int64
 	)
 	// 判断用户是否存在
 	user := admin.UserModel{Id: uid}
@@ -47,20 +54,53 @@ func getGroup(uid int64) []int {
 		// 获取关联表的数据
 		var (
 			accessData []*admin.AuthGroupAccessModel
-			accessErr  error
+			queryErr   error
 		)
-		_, accessErr = o.QueryTable(AUTH_GROUP_ACCESS).Filter("uid", user.Id).All(&accessData)
-		if accessErr != nil {
-			logs.Error(accessErr)
+		queryNum, queryErr = o.QueryTable(AuthGroupAccess).Filter("uid", user.Id).All(&accessData)
+		if queryErr != nil {
+			logs.Error(queryErr)
+			return 0, queryErr
 		}
-		groupData = append(groupData, len(accessData))
-		for k, v := range accessData {
-			groupData[k] = v.GroupId
+		// 如果返回的记录数大于0
+		if queryNum > 0 {
+			logs.Info(queryNum)
+			// 获取组ID
+			groupIds := make([]int, len(accessData))
+			for k, v := range accessData {
+				groupIds[k] = v.GroupId
+			}
+			logs.Info(groupIds)
+			// 获取每个组的数据
+			queryNum, queryErr = o.QueryTable(AuthGroup).Filter("id__in", groupIds).All(groupData)
+			if queryErr != nil {
+				logs.Error(queryErr)
+				return 0, queryErr
+			}
+		} else {
+			return 0, errors.New("no data")
 		}
 	}
-	return groupData
+	return queryNum, nil
 }
 
 // 根据用户ID获取用户规则列表，返回值为数组
-func getUserRuleList() {
+func getUserRuleList(uid int64) ([]string, error) {
+	var groupData []*admin.AuthGroupModel
+	groupNum, groupErr := getGroup(uid, &groupData)
+	if groupErr != nil {
+		return nil, groupErr
+	}
+	if groupNum > 0 {
+		var ruleIds []string
+		for _, group := range groupData {
+			rule := strings.Split(strings.TrimSpace(group.Rules), ",")
+			ruleIds = append(ruleIds, rule...)
+		}
+		// 如果获取数据失败
+		if len(ruleIds) <= 0 {
+			return nil, errors.New("ruleIds failed to get data")
+		}
+	}
+
+	return nil, nil
 }
