@@ -70,6 +70,12 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 402: // 存在相同的记录
 		S.Msg = "There are the same records"
 		break
+	case 403:
+		S.Msg = "No records have been updated"
+		break
+	case 404: // 存在相同的记录
+		S.Msg = "Not Found"
+		break
 	case 500: //系统错误
 		S.Msg = "System error"
 		break

@@ -153,3 +153,63 @@ func (c *RuleController) Modify() {
 	fmt.Println(UpdateNum)
 	c.Response(200, "", nil)
 }
+
+// 写入权限组数据
+func (c *RuleController) WriteGroup() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	var (
+		AuthGroup admin.AuthGroupModel
+	)
+	// 结构体
+	groupForm := &struct {
+		Title       string
+		Description string
+	}{}
+
+	if ParseFormErr := c.ParseForm(groupForm); ParseFormErr != nil {
+		logs.Error(ParseFormErr.Error())
+		c.Response(500, ParseFormErr.Error(), nil)
+	}
+	logs.Info(groupForm)
+
+	o := orm.NewOrm()
+	if id > 0 {
+		AuthGroup.Id = id
+		readErr := o.Read(&AuthGroup)
+		if readErr == orm.ErrNoRows {
+			logs.Info("没有相关记录")
+			c.Response(404, "", nil)
+		} else if readErr == orm.ErrMissPK {
+			logs.Info("找不到主键")
+			c.Response(401, "", nil)
+		}
+	}
+	// 写数据到结构体里
+	AuthGroup.Title = groupForm.Title
+	AuthGroup.Description = groupForm.Description
+	if AuthGroup.Id > 0 {
+		// 更新
+		num, err := o.Update(&AuthGroup)
+		if err != nil {
+			logs.Error(err.Error())
+			c.Response(500, "", nil)
+		}
+		if num <= 0 {
+			logs.Info("更新记录为0")
+			c.Response(403, "", nil)
+		}
+	} else {
+		// 新增
+		_, insertErr := o.Insert(&AuthGroup)
+		if insertErr != nil {
+			logs.Error(insertErr.Error())
+			c.Response(500, "", nil)
+		}
+	}
+	c.Response(200, "", nil)
+}
