@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"go-admin/lib"
 	"go-admin/models/admin"
+	"strconv"
 	"time"
 )
 
@@ -156,26 +157,35 @@ func (c *RuleController) Modify() {
 
 // 写入权限组数据
 func (c *RuleController) WriteGroup() {
-	id, getErr := c.GetInt("id")
-	if getErr != nil {
-		logs.Error(getErr.Error())
-		c.Response(500, getErr.Error(), nil)
-	}
-
 	var (
 		AuthGroup admin.AuthGroupModel
+		id        int
 	)
+	queryS := c.Ctx.Input.Query("id")
+	if len(queryS) > 0 {
+		i64, parseIntErr := strconv.ParseInt(queryS, 10, 64)
+		if parseIntErr != nil {
+			logs.Error(parseIntErr.Error())
+			c.Response(500, parseIntErr.Error(), nil)
+		}
+		id = int(i64)
+	}
+
 	// 结构体
 	groupForm := &struct {
-		Title       string
+		Title       string `valid:"Required"`
 		Description string
 	}{}
 
-	if ParseFormErr := c.ParseForm(groupForm); ParseFormErr != nil {
-		logs.Error(ParseFormErr.Error())
-		c.Response(500, ParseFormErr.Error(), nil)
-	}
+	_ = c.GetRequestJson(&groupForm, true)
 	logs.Info(groupForm)
+
+	/* 表单字段验证 Start */
+	validateRes, validateMsg := lib.FormValidation(groupForm)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
 
 	o := orm.NewOrm()
 	if id > 0 {
@@ -205,6 +215,7 @@ func (c *RuleController) WriteGroup() {
 		}
 	} else {
 		// 新增
+		AuthGroup.Status = 0
 		_, insertErr := o.Insert(&AuthGroup)
 		if insertErr != nil {
 			logs.Error(insertErr.Error())
