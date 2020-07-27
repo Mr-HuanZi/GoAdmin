@@ -7,6 +7,7 @@ import (
 	"go-admin/lib"
 	"go-admin/models/admin"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -160,15 +161,16 @@ func (c *RuleController) WriteGroup() {
 	var (
 		AuthGroup admin.AuthGroupModel
 		id        int
+		AtoiErr   error
 	)
+	// 直接用GetInt的话，如果id不存在，会报错
 	queryS := c.Ctx.Input.Query("id")
 	if len(queryS) > 0 {
-		i64, parseIntErr := strconv.ParseInt(queryS, 10, 64)
-		if parseIntErr != nil {
-			logs.Error(parseIntErr.Error())
-			c.Response(500, parseIntErr.Error(), nil)
+		id, AtoiErr = strconv.Atoi(queryS)
+		if AtoiErr != nil {
+			logs.Error(AtoiErr.Error())
+			c.Response(500, AtoiErr.Error(), nil)
 		}
-		id = int(i64)
 	}
 
 	// 结构体
@@ -221,6 +223,75 @@ func (c *RuleController) WriteGroup() {
 			logs.Error(insertErr.Error())
 			c.Response(500, "", nil)
 		}
+	}
+	c.Response(200, "", nil)
+}
+
+// 权限组授权
+func (c *RuleController) AccessAuto() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, "", nil)
+	}
+
+	// 查询组是否存在
+	AuthGroup := admin.AuthGroupModel{Id: id}
+	o := orm.NewOrm()
+	readErr := o.Read(&AuthGroup)
+	if readErr == orm.ErrNoRows {
+		logs.Info("没有相关记录")
+		c.Response(404, "", nil)
+	} else if readErr == orm.ErrMissPK {
+		logs.Info("找不到主键")
+		c.Response(401, "", nil)
+	}
+
+	// 获取请求数据
+	rulesJson := &struct {
+		Rules string `valid:"Required"`
+	}{}
+
+	_ = c.GetRequestJson(&rulesJson, true)
+	logs.Info(rulesJson)
+
+	/* 表单字段验证 Start */
+	validateRes, validateMsg := lib.FormValidation(rulesJson)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+
+	// 尝试分割字符串
+	rules := strings.Split(rulesJson.Rules, ",")
+	if len(rules) <= 0 {
+		logs.Info("字符串分割结果为空")
+		c.Response(502, "", nil)
+	}
+	fmt.Println(rules)
+	// 去除空元素
+	var rulesResult []string
+	for _, value := range rules {
+		if value != "" {
+			rule, err := strconv.Atoi(value)
+			if err == nil {
+				rulesResult = append(rulesResult, strconv.Itoa(rule)) //把变量转换回字符串
+			}
+		}
+	}
+	fmt.Println(rulesResult)
+
+	// 合并字符串
+	AuthGroup.Rules = strings.Join(rulesResult, ",")
+	// 更新数据
+	num, updateErr := o.Update(&AuthGroup, "rules")
+	if updateErr != nil {
+		logs.Error(updateErr.Error())
+		c.Response(500, updateErr.Error(), nil)
+	}
+	if num <= 0 {
+		logs.Info("没有记录被更新")
+		c.Response(403, "", nil)
 	}
 	c.Response(200, "", nil)
 }

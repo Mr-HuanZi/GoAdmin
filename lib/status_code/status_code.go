@@ -17,6 +17,7 @@ type StatusCode struct {
 func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	S.Code = code
 	switch code {
+	// 登录代码
 	case 100: //登录成功
 		S.Msg = "Login successfully"
 		break
@@ -44,11 +45,13 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 110: //注册成功
 		S.Msg = "Registered successfully"
 		break
+	// 操作类代码
 	case 200: //成功码
 		S.Msg = "Successful operation"
 		break
 	case 201: //操作失败
 		S.Msg = "Operation failed"
+	// 请求类代码
 	case 301: //请求数据解析失败
 		S.Msg = "Request data parsing failed"
 		break
@@ -61,6 +64,7 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 304: //表单验证失败
 		S.Msg = "Form validation failed"
 		break
+	// 数据库类代码
 	case 400: //数据库查询错误
 		S.Msg = "Database query error"
 		break
@@ -70,18 +74,23 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 402: // 存在相同的记录
 		S.Msg = "There are the same records"
 		break
-	case 403:
+	case 403: // 没有记录被更新
 		S.Msg = "No records have been updated"
 		break
-	case 404: // 存在相同的记录
+	case 404: // 查询不到结果
 		S.Msg = "Not Found"
 		break
+	// 系统级别代码
 	case 500: //系统错误
 		S.Msg = "System error"
 		break
 	case 501: //未知的错误
 		S.Msg = "Unknown error"
 		break
+	case 502: // 数据格式不正确
+		S.Msg = "Format error"
+		break
+	// 模块类代码
 	case 600: //已存在相同的文章栏目别名
 		S.Msg = "Duplicate category alias"
 		break
