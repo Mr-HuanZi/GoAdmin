@@ -37,7 +37,6 @@ func (c *UserController) List() {
 	)
 
 	_ = c.GetRequestJson(&SearchFormInstance, false)
-	logs.Info(SearchFormInstance)
 
 	//获取每页记录条数, 页码, 计算页码偏移量
 	SearchFormInstance.Limit, SearchFormInstance.Page, offset = c.Paginate(SearchFormInstance.Page, SearchFormInstance.Limit)
@@ -82,7 +81,6 @@ func (c *UserController) CreateUser() {
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
-	logs.Info(UserForm)
 
 	/* 表单字段验证 Start */
 	validateRes, validateMsg = lib.FormValidation(UserForm)
@@ -123,7 +121,6 @@ func (c *UserController) Modify() {
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
-	logs.Info(UserForm)
 
 	/* 表单字段验证 Start */
 	if id == 0 {

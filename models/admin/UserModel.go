@@ -9,7 +9,7 @@ import (
 
 type UserModel struct {
 	Id                int64  `orm:"pk"`
-	UserType          int8   `valid:"Range(0,2)"`//用户类别
+	UserType          int8   `valid:"Range(0,2)"` //用户类别
 	Sex               int8   //性别
 	Birthday          int    //生日
 	LastLoginTime     int64  //最后登录时间
@@ -52,7 +52,6 @@ func Login(username string, password string) (int, int64) {
 	//cut,err := o.QueryTable(user).Filter("user_login", username).Filter("user_pass", password).Count()
 	//查询完整的记录
 	err := o.QueryTable(user).Filter("user_login", username).Filter("user_pass", password).One(&user)
-	logs.Info(user)
 	if err == orm.ErrMultiRows {
 		// 查询到多个记录
 		return 106, 0
@@ -71,7 +70,13 @@ func UpdateUserLoginInfo(uid int64, ip string) {
 		user.LastLoginTime = time.Now().Unix() //获取当前登录时间
 		user.LastLoginIp = ip                  //记录登录IP
 		if num, err := o.Update(&user, "LastLoginTime", "LastLoginIp"); err == nil {
-			logs.Info(num)
+			if num > 0 {
+				logs.Info("用户" + user.UserLogin + "登录信息更新成功，登录IP为[" + ip + "]")
+			} else {
+				logs.Info("用户" + user.UserLogin + "登录信息更新失败")
+			}
+		} else {
+			logs.Error(err)
 		}
 	}
 }
@@ -85,7 +90,7 @@ func CheckUserRepeat(username string, email string) bool {
 	var user UserModel
 	cnt, err := o.QueryTable(user).SetCond(ormConditionObj).Count()
 	if err != nil {
-		logs.Info(err)
+		logs.Error(err)
 		return true
 	} else if cnt > 0 {
 		return true

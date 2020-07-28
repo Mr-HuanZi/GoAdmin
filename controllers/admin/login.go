@@ -36,7 +36,6 @@ func (c *LoginController) Post() {
 		uid       int64
 	)
 	_ = c.GetRequestJson(&loginForm, true)
-	logs.Info(loginForm)
 	/* 表单字段验证 Start */
 	vaildRes, vaildMsg = lib.FormValidation(&loginForm)
 	if !vaildRes {
@@ -74,7 +73,6 @@ func (c *LoginController) Register() {
 		vaildRes     bool
 	)
 	_ = c.GetRequestJson(&registerForm, true)
-	logs.Info(registerForm)
 	//验证表单
 	vaildRes, vaildMsg = lib.FormValidation(&registerForm)
 	if !vaildRes {

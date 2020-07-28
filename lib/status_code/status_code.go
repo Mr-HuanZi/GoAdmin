@@ -90,6 +90,9 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 502: // 数据格式不正确
 		S.Msg = "Format error"
 		break
+	case 503: // 数据类型错误
+		S.Msg = "Wrong data type"
+		break
 	// 模块类代码
 	case 600: //已存在相同的文章栏目别名
 		S.Msg = "Duplicate category alias"

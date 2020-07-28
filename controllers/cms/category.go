@@ -36,7 +36,6 @@ func (c *CategoryController) List() {
 		offset              int
 	)
 	_ = c.GetRequestJson(&CategoryListSearchS, false)
-	logs.Info(CategoryListSearchS)
 
 	//获取每页记录条数, 页码, 计算页码偏移量
 	CategoryListSearchS.Limit, CategoryListSearchS.Page, offset = c.Paginate(CategoryListSearchS.Page, CategoryListSearchS.Limit)
@@ -74,7 +73,6 @@ func (c *CategoryController) Add() {
 		validateRes  bool
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
-	logs.Info(CategoryForm)
 
 	/* 表单字段验证 Start */
 	validateRes, validateMsg = lib.FormValidation(CategoryForm)
@@ -120,7 +118,6 @@ func (c *CategoryController) Modify() {
 		validateRes  bool
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
-	logs.Info(CategoryForm)
 
 	/* 表单字段验证 Start */
 	if id == 0 {

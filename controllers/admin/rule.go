@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"go-admin/lib"
 	"go-admin/models/admin"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -63,7 +64,6 @@ func (c *RuleController) Add() {
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
-	logs.Info(RuleForm)
 
 	o := orm.NewOrm()
 	/* 表单字段验证 Start */
@@ -110,7 +110,6 @@ func (c *RuleController) Modify() {
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
-	logs.Info(RuleForm)
 
 	o := orm.NewOrm()
 	/* 表单字段验证 Start */
@@ -180,7 +179,6 @@ func (c *RuleController) WriteGroup() {
 	}{}
 
 	_ = c.GetRequestJson(&groupForm, true)
-	logs.Info(groupForm)
 
 	/* 表单字段验证 Start */
 	validateRes, validateMsg := lib.FormValidation(groupForm)
@@ -228,7 +226,7 @@ func (c *RuleController) WriteGroup() {
 }
 
 // 权限组授权
-func (c *RuleController) AccessAuto() {
+func (c *RuleController) AccessAuth() {
 	id, getErr := c.GetInt("id")
 	if getErr != nil {
 		logs.Error(getErr.Error())
@@ -253,7 +251,6 @@ func (c *RuleController) AccessAuto() {
 	}{}
 
 	_ = c.GetRequestJson(&rulesJson, true)
-	logs.Info(rulesJson)
 
 	/* 表单字段验证 Start */
 	validateRes, validateMsg := lib.FormValidation(rulesJson)
@@ -294,4 +291,49 @@ func (c *RuleController) AccessAuto() {
 		c.Response(403, "", nil)
 	}
 	c.Response(200, "", nil)
+}
+
+// 人员授权才做
+func (c *RuleController) MemberAuth() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, "", nil)
+	}
+	// 查询组是否存在
+	AuthGroup := admin.AuthGroupModel{Id: id}
+	o := orm.NewOrm()
+	readErr := o.Read(&AuthGroup)
+	if readErr == orm.ErrNoRows {
+		logs.Info("没有相关记录")
+		c.Response(404, "", nil)
+	} else if readErr == orm.ErrMissPK {
+		logs.Info("找不到主键")
+		c.Response(401, "", nil)
+	}
+
+	postJson := &struct {
+		Uid []interface{} `valid:"Required"`
+	}{}
+
+	_ = c.GetRequestJson(&postJson, true)
+
+	/* 表单字段验证 Start */
+	validateRes, validateMsg := lib.FormValidation(postJson)
+	if !validateRes {
+		c.Response(304, validateMsg, nil)
+	}
+	/* 表单字段验证 End */
+
+	actType := c.GetString("type")
+	if actType == "auth" {
+		// 成员授权
+		for _, v := range postJson.Uid {
+			if reflect.TypeOf(v).String() != "float64" {
+				// 如果类型不对，则终止
+				c.Response(503, "", nil)
+				break
+			}
+		}
+	}
 }

@@ -37,7 +37,6 @@ func (c *ArticleController) List() {
 		offset             int
 	)
 	_ = c.GetRequestJson(&ArticleListSearchS, false)
-	logs.Info(ArticleListSearchS)
 
 	//获取每页记录条数, 页码, 计算页码偏移量
 	ArticleListSearchS.Limit, ArticleListSearchS.Page, offset = c.Paginate(ArticleListSearchS.Page, ArticleListSearchS.Limit)
@@ -86,7 +85,6 @@ func (c *ArticleController) Release() {
 		ArticleModel = new(cms.ArticleModel)
 	)
 	_ = c.GetRequestJson(&ArticleModel, true)
-	logs.Info(ArticleModel)
 
 	//验证表单
 	valid := validation.Validation{}
@@ -162,7 +160,6 @@ func (c *ArticleController) Modify() {
 		ArticleForm = new(cms.ArticleModel)
 	)
 	_ = c.GetRequestJson(&ArticleForm, true)
-	logs.Info(ArticleForm)
 
 	//验证表单
 	if id == 0 {

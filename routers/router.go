@@ -36,7 +36,8 @@ func init() {
 		beego.NSRouter("/rule/add", &admin.RuleController{}, "post:Add"),
 		beego.NSRouter("/rule/modify", &admin.RuleController{}, "post:Modify"),
 		beego.NSRouter("/rule/WriteGroup", &admin.RuleController{}, "post:WriteGroup"),
-		beego.NSRouter("/rule/AccessAuto", &admin.RuleController{}, "post:AccessAuto"),
+		beego.NSRouter("/rule/AccessAuth", &admin.RuleController{}, "post:AccessAuth"),
+		beego.NSRouter("/rule/MemberAuth", &admin.RuleController{}, "post:MemberAuth"),
 	)
 
 	beego.AddNamespace(ns)
