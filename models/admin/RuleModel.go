@@ -1,10 +1,28 @@
 package admin
 
+// 权限模型
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
 
+// 权限组和用户对应表
+type AuthGroupAccessModel struct {
+	Id      int64 `orm:"pk"`
+	Uid     int64
+	GroupId int
+}
+
+// 权限组表
+type AuthGroupModel struct {
+	Id          int `orm:"pk"`
+	Title       string
+	Description string
+	Status      int8
+	Rules       string
+}
+
+// 规则表
 type RuleModel struct {
 	Id         int    `orm:"pk"`
 	Name       string `valid:"Required"` // 规则名
@@ -19,7 +37,17 @@ type RuleModel struct {
 
 func init() {
 	//设置表前缀并且注册模型
-	orm.RegisterModelWithPrefix(beego.AppConfig.String("db::dbPrefix"), new(RuleModel))
+	orm.RegisterModelWithPrefix(beego.AppConfig.String("db::dbPrefix"), new(RuleModel), new(AuthGroupAccessModel), new(AuthGroupModel))
+}
+
+//自定义表名
+func (Rule *AuthGroupAccessModel) TableName() string {
+	return "auth_group_access"
+}
+
+//自定义表名
+func (Rule *AuthGroupModel) TableName() string {
+	return "auth_group"
 }
 
 //自定义表名
