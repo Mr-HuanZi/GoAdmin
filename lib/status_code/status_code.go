@@ -80,6 +80,9 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 404: // 查询不到结果
 		S.Msg = "Not Found"
 		break
+	case 405: // 没有记录被删除
+		S.Msg = "No records were deleted"
+		break
 	// 系统级别代码
 	case 500: // 系统错误
 		S.Msg = "System error"

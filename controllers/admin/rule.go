@@ -224,6 +224,31 @@ func (c *RuleController) WriteGroup() {
 	c.Response(200, "", nil)
 }
 
+// 删除权限组
+func (c *RuleController) DeleteGroup() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr)
+		c.Response(500, "", nil)
+	}
+
+	if id <= 0 {
+		c.Response(303, "", nil)
+	}
+
+	o := orm.NewOrm()
+	if num, err := o.Delete(&admin.AuthGroupModel{Id: id}); err == nil {
+		if num > 0 {
+			c.Response(200, "", nil)
+		} else {
+			c.Response(405, "", nil)
+		}
+	} else {
+		logs.Error(err)
+		c.Response(500, err.Error(), nil)
+	}
+}
+
 // 权限组授权
 func (c *RuleController) AccessAuth() {
 	id, getErr := c.GetInt("id")
