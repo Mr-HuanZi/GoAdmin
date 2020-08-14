@@ -6,7 +6,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	"go-admin/lib"
 	"go-admin/models/admin"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -293,7 +292,7 @@ func (c *RuleController) AccessAuth() {
 	c.Response(200, "", nil)
 }
 
-// 人员授权才做
+// 人员授权操作
 func (c *RuleController) MemberAuth() {
 	id, getErr := c.GetInt("id")
 	if getErr != nil {
@@ -312,28 +311,73 @@ func (c *RuleController) MemberAuth() {
 		c.Response(401, "", nil)
 	}
 
-	postJson := &struct {
-		Uid []interface{} `valid:"Required"`
-	}{}
+	var postJson map[string][]int64
 
 	_ = c.GetRequestJson(&postJson, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg := lib.FormValidation(postJson)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
+	if _, ok := postJson["Uid"]; !ok {
+		c.Response(304, "Missing Uid", nil)
+	}
+	if len(postJson["Uid"]) <= 0 {
+		c.Response(304, "Uid is empty", nil)
 	}
 	/* 表单字段验证 End */
 
-	actType := c.GetString("type")
-	if actType == "auth" {
-		// 成员授权
-		for _, v := range postJson.Uid {
-			if reflect.TypeOf(v).String() != "float64" {
-				// 如果类型不对，则终止
-				c.Response(503, "", nil)
-				break
+	// 成员授权
+	// 检查当前组是否已有这些人员的授权
+	var list orm.ParamsList
+	// 获取当前组的授权人员
+	_, err := o.QueryTable(new(admin.AuthGroupAccessModel)).Filter("group_id", id).ValuesFlat(&list, "uid")
+	if err != nil {
+		c.Response(500, "", nil)
+	}
+	logs.Info(list)
+
+	var resUid []int64
+	// 有结果的时候处理
+	if len(list) > 0 {
+		for _, postUid := range postJson["Uid"] {
+			in := false
+			for i := 0; i < len(list); i++ {
+				switch list[i].(type) {
+				case int64:
+					if list[i].(int64) == postUid {
+						in = true
+					}
+					break
+				}
+			}
+			// 如果postUid不在查询到的list中，则为新增的人员
+			if !in {
+				resUid = append(resUid, postUid)
 			}
 		}
+	} else {
+		resUid = postJson["Uid"]
 	}
+
+	logs.Info(resUid)
+	if len(resUid) > 0 {
+		var authGroupAccess []admin.AuthGroupAccessModel
+		// 插入新数据
+		for _, uid := range resUid {
+			authGroupAccess = append(authGroupAccess, admin.AuthGroupAccessModel{Uid: uid, GroupId: id})
+		}
+		logs.Info(authGroupAccess)
+
+		successNums, err := o.InsertMulti(100, authGroupAccess)
+		if err != nil {
+			logs.Error(err)
+			c.Response(500, err.Error(), nil)
+		}
+		if successNums <= 0 {
+			logs.Error("新增记录为0")
+			c.Response(403, "", nil)
+		}
+		// 操作成功
+		c.Response(200, "", nil)
+	}
+	// 没有需要更新的数据
+	c.Response(403, "", nil)
 }

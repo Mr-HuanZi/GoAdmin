@@ -92,6 +92,8 @@ func (base *BaseController) GetRequestJson(s interface{}, stopRequest bool) erro
 			return errors.New("input is empty")
 		}
 	}
+	logs.Info("RequestBody:")
+	logs.Info(data)
 	jsonErr := json.Unmarshal(data, s)
 	if jsonErr != nil {
 		logs.Error("json.Unmarshal is err:", jsonErr.Error())

@@ -81,10 +81,10 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 		S.Msg = "Not Found"
 		break
 	// 系统级别代码
-	case 500: //系统错误
+	case 500: // 系统错误
 		S.Msg = "System error"
 		break
-	case 501: //未知的错误
+	case 501: // 未知的错误
 		S.Msg = "Unknown error"
 		break
 	case 502: // 数据格式不正确
