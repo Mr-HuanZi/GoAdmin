@@ -406,3 +406,35 @@ func (c *RuleController) MemberAuth() {
 	// 没有需要更新的数据
 	c.Response(403, "", nil)
 }
+
+// 移除人员权限
+func (c *RuleController) RemoveMemberAuth() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, "", nil)
+	}
+	var postJson map[string][]int64
+
+	_ = c.GetRequestJson(&postJson, true)
+
+	/* 表单字段验证 Start */
+	if _, ok := postJson["Uid"]; !ok {
+		c.Response(304, "Missing Uid", nil)
+	}
+	if len(postJson["Uid"]) <= 0 {
+		c.Response(304, "Uid is empty", nil)
+	}
+	/* 表单字段验证 End */
+
+	// 删除数据
+	o := orm.NewOrm()
+	delNum, delErr := o.QueryTable(new(admin.AuthGroupAccessModel)).Filter("group_id", id).Filter("uid__in", postJson["Uid"]).Delete()
+	if delErr != nil {
+		c.Response(500, "", nil)
+	}
+	if delNum <= 0 {
+		c.Response(405, "", nil)
+	}
+	c.Response(200, "", nil)
+}

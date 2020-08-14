@@ -39,6 +39,7 @@ func init() {
 		beego.NSRouter("/rule/DeleteGroup", &admin.RuleController{}, "post:DeleteGroup"),
 		beego.NSRouter("/rule/AccessAuth", &admin.RuleController{}, "post:AccessAuth"),
 		beego.NSRouter("/rule/MemberAuth", &admin.RuleController{}, "post:MemberAuth"),
+		beego.NSRouter("/rule/RemoveMemberAuth", &admin.RuleController{}, "post:RemoveMemberAuth"),
 	)
 
 	beego.AddNamespace(ns)
