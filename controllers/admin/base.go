@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"go-admin/lib"
 	"go-admin/lib/jwt"
 	"go-admin/lib/rule"
 	"go-admin/lib/status_code"
@@ -27,7 +28,7 @@ var StatusCodeInstance status_code.StatusCode
 func (base *BaseController) Prepare() {
 	// 日志开始
 	logs.Info("\r\n\r\n")
-	logs.Info(base.Ctx.Input.IP(), "["+base.Ctx.Input.Method()+"]", base.Ctx.Input.URL(), base.Ctx.Input.URI())
+	logs.Info(base.Ctx.Input.IP(), "["+base.Ctx.Input.Method()+"]", base.Ctx.Input.URI())
 	//验证登录
 	var checkLogin = true
 	var ruleExclude []string
@@ -68,12 +69,12 @@ func (base *BaseController) Prepare() {
 	}
 
 	// 初始化权限规则
-	initRule()
+	base.initRule()
 }
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
 	statusCode := StatusCodeInstance.CreateData(code, msg, data)
-	logs.Info(statusCode)
+	logs.Debug(statusCode)
 	base.Data["json"] = &statusCode
 	base.ServeJSON()
 	base.StopRun()
@@ -92,14 +93,13 @@ func (base *BaseController) GetRequestJson(s interface{}, stopRequest bool) erro
 			return errors.New("input is empty")
 		}
 	}
-	logs.Info("RequestBody:")
-	logs.Info(data)
+	logs.Debug("RequestBody:", lib.BytesToString(data))
 	jsonErr := json.Unmarshal(data, s)
 	if jsonErr != nil {
 		logs.Error("json.Unmarshal is err:", jsonErr.Error())
 		base.Response(301, "", nil)
 	}
-	logs.Info(s)
+	logs.Debug(s)
 	return nil
 }
 
@@ -162,6 +162,9 @@ func (base *BaseController) Paginate(p int, l int) (int, int, int) {
 }
 
 // 初始化权限规则
-func initRule() {
-	rule.Check()
+func (base *BaseController) initRule() {
+	// 获取当前的请求URL
+	logs.Info(base.Ctx.Input.URI())
+	logs.Info(base.Ctx.Input.Param(":id"))
+	rule.Check("", base.ThatUser.Id, false)
 }

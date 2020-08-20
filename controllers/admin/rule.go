@@ -135,7 +135,7 @@ func (c *RuleController) Modify() {
 
 	if err == orm.ErrNoRows {
 		logs.Error("查询不到")
-		c.Response(602, "", nil)
+		c.Response(404, "", nil)
 	} else if err == orm.ErrMissPK {
 		logs.Error("找不到主键")
 		c.Response(401, "", nil)

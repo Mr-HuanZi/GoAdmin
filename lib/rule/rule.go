@@ -27,12 +27,14 @@ func init() {
 }
 
 // 验证权限
-func Check() bool {
+func Check(rule string, uid int64, strict bool) bool {
 	if !AuthON {
 		return true
 	}
-_:
-	getUserRuleList(1)
+	// 获取当前用户的规则列表
+	ruleList, _ := getUserRuleList(uid)
+	logs.Info(ruleList)
+	//
 	return true
 }
 
@@ -85,7 +87,11 @@ func getGroup(uid int64, groupData interface{}) (int64, error) {
 
 // 根据用户ID获取用户规则列表，返回值为数组
 func getUserRuleList(uid int64) ([]string, error) {
-	var groupData []*admin.AuthGroupModel
+	var (
+		groupData []*admin.AuthGroupModel
+		ruleList  []*admin.RuleModel
+		ruleStr   []string
+	)
 	groupNum, groupErr := getGroup(uid, &groupData)
 	if groupErr != nil {
 		return nil, groupErr
@@ -93,6 +99,7 @@ func getUserRuleList(uid int64) ([]string, error) {
 	if groupNum > 0 {
 		var ruleIds []string
 		for _, group := range groupData {
+			logs.Info(group.Rules)
 			rule := strings.Split(strings.TrimSpace(group.Rules), ",")
 			ruleIds = append(ruleIds, rule...)
 		}
@@ -100,7 +107,29 @@ func getUserRuleList(uid int64) ([]string, error) {
 		if len(ruleIds) <= 0 {
 			return nil, errors.New("ruleIds failed to get data")
 		}
+		// 从规则表中获取数据
+		o := orm.NewOrm()
+		ruleModelQueryNum, ruleModelQueryErr := o.QueryTable(AuthRule).Filter("id__in", ruleIds).All(&ruleList)
+		if ruleModelQueryErr != nil {
+			return nil, ruleModelQueryErr
+		}
+		if ruleModelQueryNum > 0 {
+			for _, rule := range ruleList {
+				var s string
+				if rule.Param != "" {
+					if strings.Index(rule.Param, "?") != -1 {
+						s = rule.Rule + rule.Param
+					} else {
+						s = rule.Rule + "?" + rule.Param
+					}
+				} else {
+					s = rule.Rule
+				}
+				ruleStr = append(ruleStr, s)
+			}
+			return ruleStr, nil
+		}
+		return nil, errors.New("not found")
 	}
-
 	return nil, nil
 }
