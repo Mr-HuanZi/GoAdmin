@@ -27,7 +27,7 @@ type RegisterFormS struct {
 }
 
 //登录
-func (c *LoginController) Post() {
+func (c *LoginController) Login() {
 	var (
 		loginForm LoginFormS
 		vaildMsg  string

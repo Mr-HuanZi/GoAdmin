@@ -12,12 +12,12 @@ type RouterList struct {
 	Method     string
 }
 
-var RouterListInterface = []*RouterList{
+var RouterListInterface = []RouterList{
 	//************************* 登录 *************************//
 	{
 		Router:     "/login",
 		Controller: &admin.LoginController{},
-		Method:     "",
+		Method:     "post:Login",
 	},
 	{
 		Router:     "/login/test",
