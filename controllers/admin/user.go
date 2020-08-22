@@ -107,6 +107,7 @@ func (c *UserController) CreateUser() {
 
 }
 
+// 修改用户信息
 func (c *UserController) Modify() {
 	id, getErr := c.GetInt64("id")
 	if getErr != nil {
@@ -159,5 +160,39 @@ func (c *UserController) Modify() {
 		c.Response(500, "", nil)
 	}
 	fmt.Println(UpdateNum)
+	c.Response(200, "", nil)
+}
+
+// 禁用用户
+func (c *UserController) ForbidUser() {
+	c.changeUserStatus(0)
+}
+
+// 启用用户
+func (c *UserController) ResumeUser() {
+	c.changeUserStatus(1)
+}
+
+func (c *UserController) changeUserStatus(status int8) {
+	var UidMap map[string][]int64
+	_ = c.GetRequestJson(&UidMap, true)
+	logs.Info(UidMap)
+
+	/* 表单字段验证 Start */
+	if _, ok := UidMap["Uid"]; !ok {
+		c.Response(304, "Missing Uid", nil)
+	}
+	if len(UidMap["Uid"]) <= 0 {
+		c.Response(304, "Uid is empty", nil)
+	}
+	/* 表单字段验证 End */
+
+	updateNum, updateErr := admin.ChangeUserStatus(UidMap["Uid"], status)
+	if updateErr != nil {
+		c.Response(500, "", nil)
+	}
+	if updateNum <= 0 {
+		c.Response(405, "", nil)
+	}
 	c.Response(200, "", nil)
 }

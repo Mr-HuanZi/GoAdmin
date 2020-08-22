@@ -120,3 +120,11 @@ func GetUser(uid int64) (UserModel, error) {
 	}
 	return UserModel{}, err
 }
+
+// 改变用户的状态值
+func ChangeUserStatus(uid []int64, status int8) (int64, error) {
+	o := orm.NewOrm()
+	return o.QueryTable(new(UserModel)).Filter("id__in", uid).Update(orm.Params{
+		"user_status": status,
+	})
+}
