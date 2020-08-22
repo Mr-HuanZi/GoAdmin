@@ -17,7 +17,7 @@ var RouterListInterface = []*RouterList{
 	{
 		Router:     "/login",
 		Controller: &admin.LoginController{},
-		Method:     "",
+		Method:     "get,post:Login",
 	},
 	{
 		Router:     "/login/test",
