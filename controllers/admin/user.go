@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"go-admin/lib"
@@ -95,10 +94,17 @@ func (c *UserController) CreateUser() {
 	UserForm.First = 1
 	UserForm.UserStatus = 1
 	UserForm.UserType = 1 //管理员类型
+	// 密码加密
+	UserForm.UserPass = lib.Encryption(UserForm.UserPass)
 
+	// 检查用户名是否存在
+	duplication := admin.CheckUserDuplication(UserForm.UserLogin)
+	if duplication {
+		c.Response(107, "", nil)
+	}
 	// 写入数据
 	o := orm.NewOrm()
-	_, err := o.Insert(UserForm)
+	_, err := o.Insert(&UserForm)
 	if err != nil {
 		logs.Error(err)
 		c.Response(500, "", nil)
@@ -146,20 +152,35 @@ func (c *UserController) Modify() {
 		c.Response(401, "", nil)
 	}
 
+	// 密码加密
+	UserForm.UserPass = lib.Encryption(UserForm.UserPass)
+
 	// 不能被修改的数据
 	UserForm.CreateTime = User.CreateTime
 	UserForm.UpdateTime = User.UpdateTime
 	UserForm.First = User.First
 	UserForm.UserStatus = User.UserStatus
 	UserForm.UserType = 1 //管理员类型
+	UserForm.Id = User.Id
+
+	// 如果修改了用户名，检查用户名是否存在
+	if UserForm.UserLogin != User.UserLogin {
+		duplication := admin.CheckUserDuplication(UserForm.UserLogin)
+		if duplication {
+			c.Response(107, "", nil)
+		}
+	}
 
 	//保存数据
-	UpdateNum, UpdateErr := o.Update(UserForm)
+	UpdateNum, UpdateErr := o.Update(&UserForm)
 	if UpdateErr != nil {
 		logs.Error(err)
 		c.Response(500, "", nil)
 	}
-	fmt.Println(UpdateNum)
+	if UpdateNum <= 0 {
+		logs.Notice("更新用户信息的记录为[", UpdateNum, "]")
+		c.Response(403, "", nil)
+	}
 	c.Response(200, "", nil)
 }
 

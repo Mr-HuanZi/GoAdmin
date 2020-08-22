@@ -128,3 +128,18 @@ func ChangeUserStatus(uid []int64, status int8) (int64, error) {
 		"user_status": status,
 	})
 }
+
+// 检查用户名是否重复
+func CheckUserDuplication(username string) bool {
+	o := orm.NewOrm()
+	// 检查用户名是否存在
+	count, countErr := o.QueryTable(new(UserModel)).Filter("user_login", username).Count()
+	if countErr != nil {
+		return true
+	}
+	if count > 0 {
+		logs.Notice("用户名[", username, "]", "已存在[", count, "]个")
+		return true
+	}
+	return false
+}
