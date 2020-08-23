@@ -77,6 +77,16 @@ var RouterListInterface = []RouterList{
 		Controller: &admin.UserController{},
 		Method:     "post:Modify",
 	},
+	{
+		Router:     "/user/forbid",
+		Controller: &admin.UserController{},
+		Method:     "post:ForbidUser",
+	},
+	{
+		Router:     "/user/resume",
+		Controller: &admin.UserController{},
+		Method:     "post:ResumeUser",
+	},
 	//************************* 权限规则 *************************//
 	{
 		Router:     "/rule/list",
