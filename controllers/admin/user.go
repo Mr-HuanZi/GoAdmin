@@ -197,7 +197,6 @@ func (c *UserController) ResumeUser() {
 func (c *UserController) changeUserStatus(status int8) {
 	var UidMap map[string][]int64
 	_ = c.GetRequestJson(&UidMap, true)
-	logs.Info(UidMap)
 
 	/* 表单字段验证 Start */
 	if _, ok := UidMap["Uid"]; !ok {

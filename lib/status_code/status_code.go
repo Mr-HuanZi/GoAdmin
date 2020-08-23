@@ -30,8 +30,8 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 103: //身份验证失败，请登录
 		S.Msg = "Authentication failed"
 		break
-	case 104: // 留空
-		S.Msg = ""
+	case 104: // 用户未启用，禁止登录
+		S.Msg = "User not enabled"
 		break
 	case 105: //密码与确认密码不一致
 		S.Msg = "New and confirmed passwords are not the same"

@@ -46,16 +46,21 @@ func (User *UserModel) TableName() string {
 	return "user"
 }
 
+// 管理员登录
 func Login(username string, password string) (int, int64) {
 	o := orm.NewOrm()
 	var user UserModel
-	//cut,err := o.QueryTable(user).Filter("user_login", username).Filter("user_pass", password).Count()
 	//查询完整的记录
-	err := o.QueryTable(user).Filter("user_login", username).Filter("user_pass", password).One(&user)
+	err := o.QueryTable(user).Filter("user_type", 1).Filter("user_login", username).Filter("user_pass", password).One(&user)
 	if err == orm.ErrMultiRows {
 		// 查询到多个记录
 		return 106, 0
 	} else if user.Id != 0 {
+		// 确认用户状态
+		if user.UserStatus != 1 {
+			// 必须是已启用的用户
+			return 104, 0
+		}
 		return 100, user.Id
 	} else {
 		return 102, 0
