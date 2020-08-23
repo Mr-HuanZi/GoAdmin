@@ -42,6 +42,9 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	case 107: //注册失败，用户名或邮箱已被注册
 		S.Msg = "User name or mailbox is already registered"
 		break
+	case 108: //登录失败，用户被锁定
+		S.Msg = "Login failed,User locked"
+		break
 	case 110: //注册成功
 		S.Msg = "Registered successfully"
 		break

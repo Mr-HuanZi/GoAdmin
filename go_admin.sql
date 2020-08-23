@@ -3,15 +3,15 @@
 
  Source Server         : #1-本地库
  Source Server Type    : MySQL
- Source Server Version : 80012
- Source Host           : localhost:9981
+ Source Server Version : 50726
+ Source Host           : localhost:3306
  Source Schema         : go_admin
 
  Target Server Type    : MySQL
- Target Server Version : 80012
+ Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 23/08/2020 02:41:16
+ Date: 24/08/2020 01:13:14
 */
 
 SET NAMES utf8mb4;
@@ -125,7 +125,7 @@ CREATE TABLE `admin_category_articles`  (
   `status` tinyint(3) UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态,1:发布;0:不发布',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `term_taxonomy_id`(`category_id`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Fixed;
+) ENGINE = MyISAM AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'portal应用 分类文章对应表' ROW_FORMAT = Fixed;
 
 -- ----------------------------
 -- Records of admin_category_articles
@@ -180,20 +180,21 @@ CREATE TABLE `admin_user`  (
   `user_activation_key` varchar(60) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '激活码',
   `mobile` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户手机号',
   `position` int(11) NOT NULL DEFAULT 0 COMMENT '层级',
-  `lock_time` int(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT '登陆错误锁定开始时间',
+  `lock_time` int(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT '登陆错误锁定结束时间',
+  `lock_time_start` int(11) NOT NULL DEFAULT 0 COMMENT '登录错误锁定开始时间',
   `error_sum` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '登陆错误次数',
   `first` tinyint(1) UNSIGNED NULL DEFAULT 1 COMMENT '是否首次登录系统',
   `last_edit_pass` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '最后一次修改密码的时间',
   `openid` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '' COMMENT '微信openid',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `user_login`(`user_login`) USING BTREE
-) ENGINE = MyISAM AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = MyISAM AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of admin_user
 -- ----------------------------
-INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1598117932, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 1, 0, '');
-INSERT INTO `admin_user` VALUES (2, 1, 0, 0, 0, '', 0, 0, 1587309956, 1587309956, 1, 'zhangdahuan', '###ced8c9360bdb264d8e7fc7090f7bce54', '張大歡', '', '', 0, '', '', '', 0, 0, 0, 0, 0, '');
-INSERT INTO `admin_user` VALUES (3, 1, 0, 0, 0, '', 0, 0, 1598121194, 1598121194, 1, 'zhangdahuan1', '###ced8c9360bdb264d8e7fc7090f7bce54', '張大歡1', '', '', 0, '', '', '', 0, 0, 0, 1, 0, '');
+INSERT INTO `admin_user` VALUES (1, 1, 1, 0, 1598201910, '127.0.0.1', 0, 0, 0, 0, 1, 'admin', '###72f96bce79b5ba5645c09c8e98f6d91b', '超级管理员', '', '', 0, '', '', '', 0, 0, 0, 0, 1, 0, '');
+INSERT INTO `admin_user` VALUES (2, 1, 0, 0, 0, '', 0, 0, 1587309956, 1587309956, 1, 'zhangdahuan', '###ced8c9360bdb264d8e7fc7090f7bce54', '張大歡', '', '', 0, '', '', '', 0, 0, 0, 0, 0, 0, '');
+INSERT INTO `admin_user` VALUES (3, 1, 0, 0, 0, '', 0, 0, 1598121194, 1598121194, 1, 'zhangdahuan1', '###ced8c9360bdb264d8e7fc7090f7bce54', '張大歡1', '', '', 0, '', '', '', 0, 0, 0, 0, 1, 0, '');
 
 SET FOREIGN_KEY_CHECKS = 1;

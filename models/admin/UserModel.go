@@ -29,7 +29,8 @@ type UserModel struct {
 	UserActivationKey string //激活码
 	Mobile            string //手机号
 	Position          int    //层级
-	LockTime          int    //登陆错误锁定开始时间
+	LockTime          int64  //登陆错误锁定结束时间
+	LockTimeStart     int64  //登陆错误锁定开始时间
 	ErrorSum          int8   //登陆错误次数
 	First             int8   //是否首次登录系统
 	LastEditPass      int    //最后一次修改密码的时间
@@ -61,8 +62,18 @@ func Login(username string, password string) (int, int64) {
 			// 必须是已启用的用户
 			return 104, 0
 		}
+		// 确认用户是否被锁定
+		if user.LockTime > 0 && (time.Now().Unix() < user.LockTime) {
+			return 108, 0
+		}
 		return 100, user.Id
 	} else {
+		// 登录失败
+		// 记录错误次数
+		addUserLoginErrorSum(&user)
+		if user.ErrorSum+1 >= 3 {
+			return 108, 0
+		}
 		return 102, 0
 	}
 }
@@ -74,6 +85,9 @@ func UpdateUserLoginInfo(uid int64, ip string) {
 	if o.Read(&user) == nil {
 		user.LastLoginTime = time.Now().Unix() //获取当前登录时间
 		user.LastLoginIp = ip                  //记录登录IP
+		user.LockTime = 0
+		user.LockTimeStart = 0
+		user.ErrorSum = 0
 		if num, err := o.Update(&user, "LastLoginTime", "LastLoginIp"); err == nil {
 			if num > 0 {
 				logs.Info("用户" + user.UserLogin + "登录信息更新成功，登录IP为[" + ip + "]")
@@ -147,4 +161,32 @@ func CheckUserDuplication(username string) bool {
 		return true
 	}
 	return false
+}
+
+// 记录用户登录错误次数
+func addUserLoginErrorSum(user *UserModel) {
+	if user.Id <= 0 {
+		return
+	}
+	var (
+		err error
+		num int64
+	)
+	o := orm.NewOrm()
+	if user.ErrorSum < 3 {
+		// 登录错误次数小于3次，只记录错误次数
+		num, err = o.QueryTable(new(UserModel)).Filter("id", user.Id).Update(orm.Params{
+			"ErrorSum": orm.ColValue(orm.ColAdd, 1),
+		})
+	} else {
+		num, err = o.QueryTable(new(UserModel)).Filter("id", user.Id).Update(orm.Params{
+			"error_sum":       orm.ColValue(orm.ColAdd, 1),
+			"lock_time":       time.Now().Unix() + int64(time.Hour),
+			"lock_time_start": time.Now().Unix(),
+		})
+	}
+	if err != nil {
+		logs.Error(err)
+	}
+	logs.Debug("addUserLoginErrorSum:", num)
 }
