@@ -52,30 +52,30 @@ func Login(username string, password string) (int, int64) {
 	o := orm.NewOrm()
 	var user UserModel
 	//查询完整的记录
-	err := o.QueryTable(user).Filter("user_type", 1).Filter("user_login", username).Filter("user_pass", password).One(&user)
+	err := o.QueryTable(user).Filter("user_type", 1).Filter("user_login", username).One(&user)
 	if err == orm.ErrMultiRows {
 		// 查询到多个记录
 		return 106, 0
 	} else if user.Id != 0 {
-		// 确认用户状态
-		if user.UserStatus != 1 {
-			// 必须是已启用的用户
-			return 104, 0
-		}
 		// 确认用户是否被锁定
 		if user.LockTime > 0 && (time.Now().Unix() < user.LockTime) {
 			return 108, 0
 		}
-		return 100, user.Id
-	} else {
-		// 登录失败
-		// 记录错误次数
-		addUserLoginErrorSum(&user)
-		if user.ErrorSum+1 >= 3 {
-			return 108, 0
+		// 检查密码是否正确
+		if password != user.UserPass {
+			// 记录错误次数
+			AddUserLoginErrorSum(&user)
+			if user.ErrorSum+1 >= 3 {
+				return 108, 0
+			}
+			return 102, 0
+		} else if user.UserStatus != 1 {
+			// 账户是否是“启用”状态
+			return 104, 0
 		}
-		return 102, 0
+		return 100, user.Id
 	}
+	return 102, 0
 }
 
 //更新用户登录信息
@@ -164,7 +164,7 @@ func CheckUserDuplication(username string) bool {
 }
 
 // 记录用户登录错误次数
-func addUserLoginErrorSum(user *UserModel) {
+func AddUserLoginErrorSum(user *UserModel) {
 	if user.Id <= 0 {
 		return
 	}
@@ -179,14 +179,19 @@ func addUserLoginErrorSum(user *UserModel) {
 			"ErrorSum": orm.ColValue(orm.ColAdd, 1),
 		})
 	} else {
+		// 获取当前时间
+		nowTime := time.Now()
+		// 时间增加1小时
+		h, _ := time.ParseDuration("1h")
+		lockTime := nowTime.Add(h).Unix()
 		num, err = o.QueryTable(new(UserModel)).Filter("id", user.Id).Update(orm.Params{
 			"error_sum":       orm.ColValue(orm.ColAdd, 1),
-			"lock_time":       time.Now().Unix() + int64(time.Hour),
-			"lock_time_start": time.Now().Unix(),
+			"lock_time":       lockTime,
+			"lock_time_start": nowTime.Unix(),
 		})
 	}
 	if err != nil {
 		logs.Error(err)
 	}
-	logs.Debug("addUserLoginErrorSum:", num)
+	logs.Debug("AddUserLoginErrorSum:", num)
 }
