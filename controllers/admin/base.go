@@ -39,7 +39,7 @@ func (base *BaseController) Prepare() {
 		ruleExclude = append(ruleExclude, ruleExcludeConf)
 	}
 	for _, value := range ruleExclude {
-		if value == base.Ctx.Request.RequestURI {
+		if strings.ToUpper(value) == strings.ToUpper(base.Ctx.Request.RequestURI) {
 			checkLogin = false
 			break
 		}
