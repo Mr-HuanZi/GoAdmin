@@ -66,10 +66,9 @@ func (base *BaseController) Prepare() {
 				base.Ctx.SetCookie("Authorization", token, 3600, "/", "", false, true)
 			}
 		}
+		// 初始化权限规则
+		base.initRule()
 	}
-
-	// 初始化权限规则
-	base.initRule()
 }
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
