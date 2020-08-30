@@ -13,28 +13,24 @@ type ArticleController struct {
 	admin.BaseController
 }
 
-type ArticleListSearch struct {
-	Limit           int    `valid:"Range(0, 1000)"` //分页每页显示的条数
-	Page            int    `valid:"Min(1)"`         //当前页码
-	Title           string //文章标题
-	CreateTimeStart int    //文章创建(发表)时间
-	CreateTimeEnd   int    //文章创建(发表)时间
-	Status          uint8  //文章状态
-	Category        int    //文章分类
-}
-
-type ArticleListResult struct {
-	Total int64
-	List  []*cms.ArticleModel
-}
-
 func (c *ArticleController) List() {
 	var (
-		ArticleListSearchS ArticleListSearch
-		Err                error
-		Article            = new(cms.ArticleModel)
-		Data               = new(ArticleListResult)
-		offset             int
+		ArticleListSearchS = &struct {
+			Limit           int    `valid:"Range(0, 1000)"` //分页每页显示的条数
+			Page            int    `valid:"Min(1)"`         //当前页码
+			Title           string //文章标题
+			CreateTimeStart int    //文章创建(发表)时间
+			CreateTimeEnd   int    //文章创建(发表)时间
+			Status          uint8  //文章状态
+			Category        int    //文章分类
+		}{}
+		Data = &struct {
+			Total int64
+			List  []*cms.ArticleModel
+		}{}
+		Err     error
+		Article = new(cms.ArticleModel)
+		offset  int
 	)
 	_ = c.GetRequestJson(&ArticleListSearchS, false)
 
@@ -46,19 +42,24 @@ func (c *ArticleController) List() {
 
 	//状态搜索
 	if ArticleListSearchS.Status != 0 {
-		qs.Filter("status", ArticleListSearchS.Status)
+		qs = qs.Filter("status", ArticleListSearchS.Status)
 	} else {
-		qs.Filter("status__in", 1, 2, 3)
+		qs = qs.Filter("status__in", 1, 2, 3)
 	}
 
 	//开始时间
 	if ArticleListSearchS.CreateTimeStart != 0 {
-		qs.Filter("create_time__gte", ArticleListSearchS.CreateTimeStart)
+		qs = qs.Filter("create_time__gte", ArticleListSearchS.CreateTimeStart)
 	}
 
 	//结束时间
 	if ArticleListSearchS.CreateTimeEnd != 0 {
-		qs.Filter("create_time__lte", ArticleListSearchS.CreateTimeEnd)
+		qs = qs.Filter("create_time__lte", ArticleListSearchS.CreateTimeEnd)
+	}
+
+	// 标题搜索
+	if ArticleListSearchS.Title != "" {
+		qs = qs.Filter("title__contains", ArticleListSearchS.Title)
 	}
 
 	// 获取总条目

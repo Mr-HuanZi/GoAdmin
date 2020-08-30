@@ -98,7 +98,6 @@ func (base *BaseController) GetRequestJson(s interface{}, stopRequest bool) erro
 		logs.Error("json.Unmarshal is err:", jsonErr.Error())
 		base.Response(301, "", nil)
 	}
-	logs.Debug(s)
 	return nil
 }
 

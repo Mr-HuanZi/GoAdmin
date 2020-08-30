@@ -44,7 +44,7 @@ func (c *CategoryController) List() {
 	qs := o.QueryTable(Category)
 
 	if CategoryListSearchS.Name != "" {
-		qs.Filter("name__contains", CategoryListSearchS.Name)
+		qs = qs.Filter("name__contains", CategoryListSearchS.Name)
 	}
 
 	// 获取总条目

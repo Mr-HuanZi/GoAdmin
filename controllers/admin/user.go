@@ -45,12 +45,12 @@ func (c *UserController) List() {
 
 	// 用户名搜索
 	if SearchFormInstance.Username != "" {
-		qs.Filter("user_login__contains", SearchFormInstance.Username)
+		qs = qs.Filter("user_login__contains", SearchFormInstance.Username)
 	}
 
 	// 用户昵称搜索
 	if SearchFormInstance.Nickname != "" {
-		qs.Filter("user_nickname__contains", SearchFormInstance.Username)
+		qs = qs.Filter("user_nickname__contains", SearchFormInstance.Username)
 	}
 
 	// 获取总条目

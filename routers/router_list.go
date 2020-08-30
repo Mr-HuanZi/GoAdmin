@@ -45,6 +45,11 @@ var RouterListInterface = []RouterList{
 		Controller: &cms.ArticleController{},
 		Method:     "post:Modify",
 	},
+	{
+		Router:     "/article/delete",
+		Controller: &cms.ArticleController{},
+		Method:     "post:Delete",
+	},
 	//************************* 栏目 *************************//
 	{
 		Router:     "/category/list",
@@ -60,6 +65,11 @@ var RouterListInterface = []RouterList{
 		Router:     "/category/modify",
 		Controller: &cms.CategoryController{},
 		Method:     "post:Modify",
+	},
+	{
+		Router:     "/category/delete",
+		Controller: &cms.CategoryController{},
+		Method:     "post:Delete",
 	},
 	//************************* 用户 *************************//
 	{
