@@ -9,6 +9,7 @@ import (
 	"go-admin/lib"
 	_ "go-admin/routers"
 	"log"
+	"os"
 	"time"
 )
 
@@ -55,6 +56,12 @@ func initOrmDriver() {
 	dbName := beego.AppConfig.String("db::dbName")
 	dbStr := dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8"
 	orm.Debug = true
+	// 输出到文件
+	f, err := os.OpenFile("./logs/admin.orm.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	orm.DebugLog = orm.NewLog(f)
 	ormErr := orm.RegisterDriver("mysql", orm.DRMySQL)
 	if ormErr != nil {
 		log.Println("ORM registration failed.")
