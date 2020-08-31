@@ -137,3 +137,23 @@ func (c *CategoryController) Modify() {
 		c.Response(200, "", num)
 	}
 }
+
+// 栏目删除
+func (c *CategoryController) Delete() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	o := orm.NewOrm()
+	if num, err := o.Delete(&cms.CategoryModel{Id: id}); err == nil {
+		if num > 0 {
+			c.Response(200, "", nil)
+		} else {
+			c.Response(405, "", nil)
+		}
+	} else {
+		c.Response(500, err.Error(), nil)
+	}
+}

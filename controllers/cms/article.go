@@ -236,3 +236,29 @@ func (c *ArticleController) Modify() {
 	}
 	c.Response(200, "", nil)
 }
+
+// 文章删除
+func (c *ArticleController) Delete() {
+	id, getErr := c.GetInt64("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	o := orm.NewOrm()
+	if num, err := o.Delete(&cms.ArticleModel{Id: id}); err == nil {
+		if num > 0 {
+			// 删除关联表
+			_, delErr := o.Delete(&cms.CategoryArticlesModel{ArticlesId: id})
+			if delErr != nil {
+				// 如果出错了也不中断
+				logs.Error(delErr)
+			}
+			c.Response(200, "", nil)
+		} else {
+			c.Response(405, "", nil)
+		}
+	} else {
+		c.Response(500, err.Error(), nil)
+	}
+}
