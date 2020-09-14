@@ -73,6 +73,9 @@ func (base *BaseController) Prepare() {
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
 	statusCode := StatusCodeInstance.CreateData(code, msg, data)
+	if statusCode.Code == 103 {
+		base.Ctx.Output.Status = 401
+	}
 	logs.Debug(statusCode)
 	base.Data["json"] = &statusCode
 	base.ServeJSON()
