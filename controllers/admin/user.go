@@ -194,6 +194,7 @@ func (c *UserController) ResumeUser() {
 	c.changeUserStatus(1)
 }
 
+// 更改用户状态
 func (c *UserController) changeUserStatus(status int8) {
 	var UidMap map[string][]int64
 	_ = c.GetRequestJson(&UidMap, true)

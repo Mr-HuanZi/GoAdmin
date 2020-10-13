@@ -9,6 +9,7 @@ import (
 	"go-admin/lib/jwt"
 	"go-admin/lib/rule"
 	"go-admin/lib/status_code"
+	"go-admin/lib/sys_logs"
 	"go-admin/models/admin"
 	"strconv"
 	"strings"
@@ -71,12 +72,21 @@ func (base *BaseController) Prepare() {
 	}
 }
 
+// 执行完相应的 HTTP Method 方法之后执行
+func (base *BaseController) Finish() {
+	go sys_logs.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
+}
+
 func (base *BaseController) Response(code int, msg string, data interface{}) {
 	statusCode := StatusCodeInstance.CreateData(code, msg, data)
 	logs.Debug(statusCode)
 	base.Data["json"] = &statusCode
 	base.ServeJSON()
-	base.StopRun()
+	if code != 100 && code != 200 {
+		// 调用StopRun方法后不会再执行Finish方法，因此这里需要手动调用
+		go sys_logs.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
+		base.StopRun()
+	}
 }
 
 // 获取json请求数据
