@@ -53,8 +53,7 @@ func (base *BaseController) Prepare() {
 			base.Response(103, "", nil)
 		} else {
 			// 获取当前登录用户信息
-			LoginToken := jwt.GetTokenClaims(t)
-			getUserErr := base.getLoginUser(LoginToken.User)
+			getUserErr := base.getLoginUser(t.User)
 			if getUserErr != nil {
 				base.Response(500, getUserErr.Error(), nil) //令牌生成失败
 			}
@@ -64,7 +63,8 @@ func (base *BaseController) Prepare() {
 				base.Response(101, "", nil) //令牌生成失败
 			}
 			if token != "" {
-				base.Ctx.SetCookie("Authorization", token, 3600, "/", "", false, true)
+				base.Ctx.SetCookie("Authorization", token, 7200, "/", "", false, true)
+				base.Ctx.Output.Header("Authorization", token)
 			}
 		}
 		// 初始化权限规则

@@ -48,13 +48,14 @@ func (c *LoginController) Login() {
 	code, uid = admin.Login(loginForm.Username, loginForm.Password)
 	if code == 100 {
 		//登录成功
-		token, tokenErr := jwt.GenerateUserToken(loginForm.Username, uid) //获取登录令牌
+		token, tokenErr := jwt.GenerateUserToken(uid) //获取登录令牌
 		if tokenErr != nil {
 			c.Response(101, "", nil) //令牌生成失败
 		}
 		//记录用户登录信息
 		admin.UpdateUserLoginInfo(uid, c.Ctx.Input.IP())
-		c.Ctx.SetCookie("Authorization", token, 3600, "/", "", false, true)
+		c.Ctx.SetCookie("Authorization", token, 7200, "/", "", false, true)
+		c.Ctx.Output.Header("Authorization", token)
 		//记录session
 		c.SetSession("UserId", uid)
 	}

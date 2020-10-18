@@ -8,15 +8,18 @@ import (
 	"time"
 )
 
-type LoginToken struct {
-	Exp      int64
-	Iat      int64
-	Username string
-	User     int64
+var (
+	// Jwt加密Key，请勿泄露
+	jwtKey = "ClNNHdJLif0XrhxD"
+)
+
+type MyCustomClaims struct {
+	User int64
+	jwt.StandardClaims
 }
 
 //生成用户令牌
-func GenerateUserToken(username string, uid int64) (string, error) {
+func GenerateUserToken(uid int64) (string, error) {
 	expireSecondsConf := beego.AppConfig.String("jwt::expireSeconds")
 	var expireSeconds int
 	if s, err := strconv.Atoi(expireSecondsConf); err == nil {
@@ -24,14 +27,17 @@ func GenerateUserToken(username string, uid int64) (string, error) {
 	} else {
 		expireSeconds = 600 //默认10分钟
 	}
-	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Second * time.Duration(expireSeconds)).Unix()
-	claims["iat"] = time.Now().Unix()
-	claims["username"] = username
-	claims["User"] = uid
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	newClaims := MyCustomClaims{
+		User: uid,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(expireSeconds)).Unix(), // 过期时间
+			IssuedAt:  time.Now().Unix(),                                                 // 签发时间
+			Issuer:    "GoAdmin",                                                         // 签发人
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, newClaims)
 
-	tokenString, err := token.SignedString([]byte(beego.AppConfig.String("jwt::jwtKey")))
+	tokenString, err := token.SignedString([]byte(jwtKey))
 	if err != nil {
 		return "", err
 	}
@@ -40,37 +46,34 @@ func GenerateUserToken(username string, uid int64) (string, error) {
 }
 
 //验证用户令牌
-func ValidateUserToken(tokenString string) (bool, *jwt.Token) {
+func ValidateUserToken(tokenString string) (bool, *MyCustomClaims) {
 	if tokenString == "" {
 		return false, nil
 	}
-	t, err := jwt.Parse(tokenString, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(beego.AppConfig.String("jwt::jwtKey")), nil
+	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (i interface{}, err error) {
+		return []byte(jwtKey), nil
 	})
-	logs.Info("%+v", t)
+	logs.Debug("%+v", token)
 	if err != nil {
 		logs.Error("转换为jwt claims失败.", err)
 		return false, nil
 	}
-	return true, t
+	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		// 解析成功
+		logs.Debug("%v %v", claims.User, claims.StandardClaims.ExpiresAt)
+		logs.Debug("token will be expired at ", time.Unix(claims.StandardClaims.ExpiresAt, 0))
+		return true, claims
+	} else {
+		logs.Warning("validate tokenString failed !!!", err)
+		return false, nil
+	}
 }
 
 //刷新用户令牌
-func RefreshUserToken(t *jwt.Token) (string, error) {
-	LoginToken := GetTokenClaims(t)
-	if LoginToken.Exp-LoginToken.Iat <= 300 {
+func RefreshUserToken(claims *MyCustomClaims) (string, error) {
+	if claims.StandardClaims.ExpiresAt-claims.StandardClaims.IssuedAt <= 300 {
 		// 如果令牌有效期小于5分钟
-		return GenerateUserToken(LoginToken.Username, LoginToken.User)
+		return GenerateUserToken(claims.User)
 	}
 	return "", nil
-}
-
-func GetTokenClaims(t *jwt.Token) LoginToken {
-	claims := t.Claims.(jwt.MapClaims)
-	var LoginToken LoginToken
-	LoginToken.Exp = int64(claims["exp"].(float64))
-	LoginToken.Username = claims["username"].(string)
-	LoginToken.User = int64(claims["User"].(float64))
-	LoginToken.Iat = time.Now().Unix()
-	return LoginToken
 }
