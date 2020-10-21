@@ -6,12 +6,19 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/session"
 	"github.com/astaxie/beego/validation"
+	"go-admin/models/admin"
 	"reflect"
 	"unsafe"
 )
 
 //全局session
 var GlobalSessions *session.Manager
+var ThatUser LoginUser
+
+type LoginUser struct {
+	admin.UserModel
+	IsRoot bool
+}
 
 // 密码加密
 // @Param str String 待加密的字符串

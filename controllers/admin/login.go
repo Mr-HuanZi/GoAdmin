@@ -52,6 +52,8 @@ func (c *LoginController) Login() {
 		if tokenErr != nil {
 			c.Response(101, "", nil) //令牌生成失败
 		}
+		// 获取用户信息
+		_ = c.getLoginUser(uid)
 		//记录用户登录信息
 		admin.UpdateUserLoginInfo(uid, c.Ctx.Input.IP())
 		c.Ctx.SetCookie("Authorization", token, 7200, "/", "", false, true)

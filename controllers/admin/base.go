@@ -17,9 +17,6 @@ import (
 
 type BaseController struct {
 	beego.Controller
-	// 当前登录的用户信息
-	ThatUser admin.UserModel
-	UserRoot bool // 当前登录用户是否管理员
 }
 
 //实例化日志模块
@@ -119,7 +116,7 @@ func (base *BaseController) getLoginUser(uid int64) error {
 		base.Response(500, "", nil)
 	}
 	var getUserErr error
-	base.ThatUser, getUserErr = admin.GetUser(uid) // 查询用户
+	lib.ThatUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
 	if getUserErr != nil {
 		logs.Error(getUserErr.Error())
 		base.Response(500, "", nil)
@@ -127,9 +124,9 @@ func (base *BaseController) getLoginUser(uid int64) error {
 	}
 
 	if uid == userAdministrator {
-		base.UserRoot = true
+		lib.ThatUser.IsRoot = true
 	} else {
-		base.UserRoot = false
+		lib.ThatUser.IsRoot = false
 	}
 	return nil
 }
@@ -174,5 +171,5 @@ func (base *BaseController) initRule() {
 	// 获取当前的请求URL
 	logs.Info(base.Ctx.Input.URI())
 	logs.Info(base.Ctx.Input.Param(":id"))
-	rule.Check("", base.ThatUser.Id, false)
+	rule.Check("", lib.ThatUser.Id, false)
 }
