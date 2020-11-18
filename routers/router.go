@@ -13,7 +13,7 @@ import (
 
 func init() {
 	l := GetRouterList()
-	ns := beego.NewNamespace("/backstage", l...)
+	ns := beego.NewNamespace("/v1", l...)
 
 	beego.AddNamespace(ns)
 }
