@@ -25,9 +25,9 @@ func WriteSysLogs(logType int8, logText string, Input *context.BeegoInput, more 
 		Param:      "",
 	}
 
-	if lib.ThatUser.Id > 0 {
-		logsData.UserId = lib.ThatUser.Id
-		logsData.Username = lib.ThatUser.UserLogin
+	if lib.CurrentUser.Id > 0 {
+		logsData.UserId = lib.CurrentUser.Id
+		logsData.Username = lib.CurrentUser.UserLogin
 	}
 
 	// 处理请求数据

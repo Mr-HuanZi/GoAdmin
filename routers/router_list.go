@@ -110,6 +110,11 @@ var RouterListInterface = []RouterList{
 		Controller: &admin.UserController{},
 		Method:     "post:ResumeUser",
 	},
+	{
+		Router:     "/user/fetchCurrent",
+		Controller: &admin.UserController{},
+		Method:     "get:FetchCurrentUser",
+	},
 	//************************* 权限规则 *************************//
 	// 权限规则列表
 	{

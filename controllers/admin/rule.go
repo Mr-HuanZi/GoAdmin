@@ -83,7 +83,7 @@ func (c *RuleController) Add() {
 
 	// 初始化一些字段
 	RuleForm.CreateTime = time.Now().Unix()
-	RuleForm.AddStaff = lib.ThatUser.Id
+	RuleForm.AddStaff = lib.CurrentUser.Id
 	RuleForm.Id = 0
 
 	// 写入数据

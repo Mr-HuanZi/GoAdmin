@@ -43,7 +43,17 @@ func (base *BaseController) Prepare() {
 		}
 	}
 	if checkLogin {
-		Authorization := base.Ctx.GetCookie("Authorization")
+		// 先从HTTP头中获取Authorization
+		Authorization := base.Ctx.Input.Header("Authorization")
+		if Authorization == "" {
+			// 如果不存在再从cookie中获取
+			Authorization = base.Ctx.GetCookie("Authorization")
+		}
+		// 第二次判断Authorization是否存在
+		if Authorization == "" {
+			// 直接返回登录失败
+			base.Response(103, "", nil)
+		}
 		b, t := jwt.ValidateUserToken(Authorization)
 		if !b {
 			//token验证失败
@@ -77,6 +87,10 @@ func (base *BaseController) Finish() {
 func (base *BaseController) Response(code int, msg string, data interface{}) {
 	statusCode := StatusCodeInstance.CreateData(code, msg, data)
 	logs.Debug(statusCode)
+	//if code == 103 {
+	//	// 更改HTTP状态码
+	//	base.Ctx.Output.Status = 401
+	//}
 	base.Data["json"] = &statusCode
 	base.ServeJSON()
 	if code != 100 && code != 200 {
@@ -116,7 +130,7 @@ func (base *BaseController) getLoginUser(uid int64) error {
 		base.Response(500, "", nil)
 	}
 	var getUserErr error
-	lib.ThatUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
+	lib.CurrentUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
 	if getUserErr != nil {
 		logs.Error(getUserErr.Error())
 		base.Response(500, "", nil)
@@ -124,9 +138,9 @@ func (base *BaseController) getLoginUser(uid int64) error {
 	}
 
 	if uid == userAdministrator {
-		lib.ThatUser.IsRoot = true
+		lib.CurrentUser.IsRoot = true
 	} else {
-		lib.ThatUser.IsRoot = false
+		lib.CurrentUser.IsRoot = false
 	}
 	return nil
 }
@@ -171,5 +185,5 @@ func (base *BaseController) initRule() {
 	// 获取当前的请求URL
 	logs.Info(base.Ctx.Input.URI())
 	logs.Info(base.Ctx.Input.Param(":id"))
-	rule.Check("", lib.ThatUser.Id, false)
+	rule.Check("", lib.CurrentUser.Id, false)
 }

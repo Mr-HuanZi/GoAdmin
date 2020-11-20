@@ -13,7 +13,7 @@ import (
 
 //全局session
 var GlobalSessions *session.Manager
-var ThatUser LoginUser
+var CurrentUser LoginUser
 
 type LoginUser struct {
 	admin.UserModel

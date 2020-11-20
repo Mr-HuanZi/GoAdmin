@@ -217,3 +217,29 @@ func (c *UserController) changeUserStatus(status int8) {
 	}
 	c.Response(200, "", nil)
 }
+
+// 获取当前用户信息
+func (c *UserController) FetchCurrentUser() {
+	if lib.CurrentUser.Id != 0 {
+		user := make(map[string]interface{})
+		user["userId"] = lib.CurrentUser.Id
+		user["nickname"] = lib.CurrentUser.UserNickname
+		user["username"] = lib.CurrentUser.UserLogin
+		user["email"] = lib.CurrentUser.UserEmail
+		user["birthday"] = lib.CurrentUser.Birthday
+		user["mobile"] = lib.CurrentUser.Mobile
+		if lib.CurrentUser.Sex == 1 {
+			user["sex"] = "男"
+		} else if lib.CurrentUser.Sex == 2 {
+			user["sex"] = "女"
+		} else {
+			user["sex"] = "保密"
+		}
+		user["signature"] = lib.CurrentUser.Signature
+		user["user_url"] = lib.CurrentUser.UserUrl
+		user["avatar"] = lib.CurrentUser.Avatar
+		c.Response(200, "", user)
+	} else {
+		c.Response(200, "", nil)
+	}
+}
