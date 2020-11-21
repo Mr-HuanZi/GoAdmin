@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/astaxie/beego/validation"
 	"go-admin/controllers/admin"
+	"go-admin/lib"
 	"go-admin/models/cms"
 	"time"
 )
@@ -16,13 +17,12 @@ type ArticleController struct {
 func (c *ArticleController) List() {
 	var (
 		ArticleListSearchS = &struct {
-			Limit           int    `valid:"Range(0, 1000)"` //分页每页显示的条数
-			Page            int    `valid:"Min(1)"`         //当前页码
-			Title           string //文章标题
-			CreateTimeStart int    //文章创建(发表)时间
-			CreateTimeEnd   int    //文章创建(发表)时间
-			Status          uint8  //文章状态
-			Category        int    //文章分类
+			Limit      int       `valid:"Range(0, 1000)"` //分页每页显示的条数
+			Page       int       `valid:"Min(1)"`         //当前页码
+			Title      string    //文章标题
+			CreateTime [2]string //文章创建时间
+			Status     uint8     //文章状态
+			Category   int       //文章分类
 		}{}
 		Data = &struct {
 			Total int64
@@ -33,6 +33,7 @@ func (c *ArticleController) List() {
 		offset  int
 	)
 	_ = c.GetRequestJson(&ArticleListSearchS, false)
+	logs.Info(ArticleListSearchS)
 
 	//获取每页记录条数, 页码, 计算页码偏移量
 	ArticleListSearchS.Limit, ArticleListSearchS.Page, offset = c.Paginate(ArticleListSearchS.Page, ArticleListSearchS.Limit)
@@ -47,14 +48,16 @@ func (c *ArticleController) List() {
 		qs = qs.Filter("status__in", 1, 2, 3)
 	}
 
-	//开始时间
-	if ArticleListSearchS.CreateTimeStart != 0 {
-		qs = qs.Filter("create_time__gte", ArticleListSearchS.CreateTimeStart)
+	// 开始时间
+	if ArticleListSearchS.CreateTime[0] != "" {
+		stamp, _ := time.ParseInLocation("2006-01-02 15:04:05", ArticleListSearchS.CreateTime[0], time.Local)
+		qs = qs.Filter("create_time__gte", stamp.UnixNano()/1e6)
 	}
 
 	//结束时间
-	if ArticleListSearchS.CreateTimeEnd != 0 {
-		qs = qs.Filter("create_time__lte", ArticleListSearchS.CreateTimeEnd)
+	if ArticleListSearchS.CreateTime[1] != "" {
+		stamp, _ := time.ParseInLocation("2006-01-02 15:04:05", ArticleListSearchS.CreateTime[1], time.Local)
+		qs = qs.Filter("create_time__lte", stamp.UnixNano()/1e6)
 	}
 
 	// 标题搜索
@@ -71,7 +74,7 @@ func (c *ArticleController) List() {
 	Data.Total = cnt
 
 	// 获取记录
-	_, Err = qs.Limit(ArticleListSearchS.Limit).Offset(offset).All(&Data.List)
+	_, Err = qs.Limit(ArticleListSearchS.Limit).Offset(offset).OrderBy("-id").All(&Data.List)
 	if Err != nil {
 		logs.Error(Err)
 		c.Response(500, "", nil)
@@ -118,12 +121,14 @@ func (c *ArticleController) Release() {
 	}
 
 	//初始化一些数据
-	ArticleModel.Status = 1                           //文章状态
-	ArticleModel.CreateTime = time.Now().Unix()       //发布时间
-	ArticleModel.UpdateTime = ArticleModel.CreateTime //更新时间
-	ArticleModel.PostHits = 0                         //查看数
-	ArticleModel.PostLike = 0                         //点赞数
-	ArticleModel.CommentCount = 0                     //评论数
+	ArticleModel.Status = 1                               //文章状态
+	ArticleModel.CreateTime = time.Now().UnixNano() / 1e6 //创建时间
+	ArticleModel.UpdateTime = ArticleModel.CreateTime     //更新时间
+	ArticleModel.PostHits = 0                             //查看数
+	ArticleModel.PostLike = 0                             //点赞数
+	ArticleModel.CommentCount = 0                         //评论数
+	ArticleModel.Author = lib.CurrentUser.UserNickname    //作者
+	ArticleModel.StaffId = lib.CurrentUser.Id             //作者ID
 
 	//开启评论
 	if ArticleModel.CommentStatus != 0 {
@@ -209,16 +214,18 @@ func (c *ArticleController) Modify() {
 	}
 
 	//初始化一些数据,保持这些数据不被人为修改
-	ArticleForm.UpdateTime = time.Now().Unix()      //更新时间
-	ArticleForm.PostHits = Article.PostHits         //查看数
-	ArticleForm.PostLike = Article.PostLike         //点赞数
-	ArticleForm.CommentCount = Article.CommentCount //评论数
+	ArticleForm.UpdateTime = time.Now().UnixNano() / 1e6 //更新时间
+	ArticleForm.PostHits = Article.PostHits              //查看数
+	ArticleForm.PostLike = Article.PostLike              //点赞数
+	ArticleForm.CommentCount = Article.CommentCount      //评论数
+	ArticleForm.Author = lib.CurrentUser.UserNickname    //作者
+	ArticleForm.StaffId = lib.CurrentUser.Id             //作者ID
 	ArticleForm.Id = id
 
 	//保存数据
 	UpdateNum, UpdateErr := o.Update(ArticleForm)
 	if UpdateErr != nil {
-		logs.Error(err)
+		logs.Error(UpdateErr)
 		c.Response(500, "", nil)
 	}
 	if UpdateNum > 0 {

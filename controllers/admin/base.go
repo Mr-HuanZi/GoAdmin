@@ -108,6 +108,7 @@ func (base *BaseController) GetRequestJson(s interface{}, stopRequest bool) erro
 	if len(data) <= 0 || data == nil {
 		if stopRequest {
 			base.Response(302, "", nil)
+			return nil
 		} else {
 			logs.Info("input is empty")
 			return errors.New("input is empty")
