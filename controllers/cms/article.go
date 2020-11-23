@@ -7,6 +7,7 @@ import (
 	"go-admin/controllers/admin"
 	"go-admin/lib"
 	"go-admin/models/cms"
+	"html"
 	"time"
 )
 
@@ -90,6 +91,9 @@ func (c *ArticleController) Release() {
 	)
 	_ = c.GetRequestJson(&ArticleModel, true)
 
+	// 对内容进行转义
+	ArticleModel.Content = html.EscapeString(ArticleModel.Content)
+
 	//验证表单
 	valid := validation.Validation{}
 	valid.Required(ArticleModel.Title, "title")
@@ -166,6 +170,9 @@ func (c *ArticleController) Modify() {
 		ArticleForm = new(cms.ArticleModel)
 	)
 	_ = c.GetRequestJson(&ArticleForm, true)
+
+	// 对内容进行转义
+	ArticleForm.Content = html.EscapeString(ArticleForm.Content)
 
 	//验证表单
 	if id == 0 {
