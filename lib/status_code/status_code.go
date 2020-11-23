@@ -19,98 +19,95 @@ func (S *StatusCode) GetStatusCode(code int) *StatusCode {
 	switch code {
 	// 登录代码
 	case 100: //登录成功
-		S.Msg = "Login successfully"
+		S.Msg = "登录成功"
 		break
 	case 101: //登录令牌生成失败
-		S.Msg = "Token generation failed"
+		S.Msg = "登录令牌生成失败"
 		break
 	case 102: //登录失败，用户名或密码错误
-		S.Msg = "Wrong username or password"
+		S.Msg = "用户名或密码错误"
 		break
 	case 103: //身份验证失败，请登录
-		S.Msg = "Authentication failed"
+		S.Msg = "无效的令牌"
 		break
 	case 104: // 用户未启用，禁止登录
-		S.Msg = "User not enabled"
+		S.Msg = "用户未启用"
 		break
 	case 105: //密码与确认密码不一致
-		S.Msg = "New and confirmed passwords are not the same"
+		S.Msg = "新密码与确认密码不一致"
 		break
 	case 106: //登录失败，存在多个相同的用户
-		S.Msg = "Login failed, multiple same users exist"
+		S.Msg = "登录失败，存在多个相同的用户"
 		break
 	case 107: //注册失败，用户名或邮箱已被注册
-		S.Msg = "User name or mailbox is already registered"
+		S.Msg = "用户名或邮箱已被注册"
 		break
 	case 108: //登录失败，用户被锁定
-		S.Msg = "Login failed,User locked"
+		S.Msg = "账户被锁定"
 		break
 	case 110: //注册成功
-		S.Msg = "Registered successfully"
+		S.Msg = "注册成功"
 		break
 	// 操作类代码
 	case 200: //成功码
-		S.Msg = "Successful operation"
+		S.Msg = "操作成功"
 		break
 	case 201: //操作失败
-		S.Msg = "Operation failed"
+		S.Msg = "操作失败"
 	// 请求类代码
 	case 301: //请求数据解析失败
-		S.Msg = "Request data parsing failed"
+		S.Msg = "请求数据解析失败"
 		break
 	case 302: //请求数据不能为空
-		S.Msg = "Request data cannot be empty"
+		S.Msg = "请求数据不能为空"
 		break
 	case 303: //ID丢失
-		S.Msg = "ID missing"
+		S.Msg = "ID丢失"
 		break
 	case 304: //表单验证失败
-		S.Msg = "Form validation failed"
+		S.Msg = "表单验证失败"
 		break
 	// 数据库类代码
 	case 400: //数据库查询错误
-		S.Msg = "Database query error"
+		S.Msg = "数据库查询错误"
 		break
 	case 401: //主键丢失
-		S.Msg = "Primary key missing"
+		S.Msg = "主键丢失"
 		break
 	case 402: // 存在相同的记录
-		S.Msg = "There are the same records"
+		S.Msg = "存在相同的记录"
 		break
 	case 403: // 没有记录被更新
-		S.Msg = "No records have been updated"
+		S.Msg = "没有记录被更新"
 		break
 	case 404: // 查询不到结果
-		S.Msg = "Not Found"
+		S.Msg = "查询不到结果"
 		break
 	case 405: // 没有记录被删除
-		S.Msg = "No records were deleted"
+		S.Msg = "没有记录被删除"
 		break
 	// 系统级别代码
 	case 500: // 系统错误
-		S.Msg = "System error"
+		S.Msg = "系统错误"
 		break
 	case 501: // 未知的错误
-		S.Msg = "Unknown error"
+		S.Msg = "未知错误"
 		break
 	case 502: // 数据格式不正确
-		S.Msg = "Format error"
+		S.Msg = "数据格式不正确"
 		break
 	case 503: // 数据类型错误
-		S.Msg = "Wrong data type"
+		S.Msg = "数据类型错误"
 		break
 	// 模块类代码
 	case 600: //已存在相同的文章栏目别名
-		S.Msg = "Duplicate category alias"
+		S.Msg = "已存在相同的文章栏目别名"
 		break
 	case 601: //找不到栏目
-		S.Msg = "Not found category"
+		S.Msg = "找不到栏目"
 		break
 	case 602: //找不到文章
-		S.Msg = "Not found article"
-		break
-	case 603: //没有文章被更新
-		S.Msg = "Not found article"
+		S.Msg = "找不到文章"
 		break
 	}
 	return S

@@ -201,10 +201,10 @@ func (c *UserController) changeUserStatus(status int8) {
 
 	/* 表单字段验证 Start */
 	if _, ok := UidMap["Uid"]; !ok {
-		c.Response(304, "Missing Uid", nil)
+		c.Response(304, "找不到Uid字段", nil)
 	}
 	if len(UidMap["Uid"]) <= 0 {
-		c.Response(304, "Uid is empty", nil)
+		c.Response(304, "Uid不能为空", nil)
 	}
 	/* 表单字段验证 End */
 

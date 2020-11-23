@@ -121,7 +121,7 @@ func (c *CategoryController) Modify() {
 
 	/* 表单字段验证 Start */
 	if id == 0 {
-		c.Response(304, "ID missing", nil)
+		c.Response(303, "", nil)
 	}
 	validateRes, validateMsg = lib.FormValidation(CategoryForm)
 	if !validateRes {

@@ -113,7 +113,7 @@ func (c *RuleController) Modify() {
 	o := orm.NewOrm()
 	/* 表单字段验证 Start */
 	if id == 0 {
-		c.Response(304, "ID missing", nil)
+		c.Response(303, "", nil)
 	}
 	validateRes, validateMsg = lib.FormValidation(RuleForm)
 	if !validateRes {

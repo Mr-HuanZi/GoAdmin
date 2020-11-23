@@ -176,7 +176,7 @@ func (c *ArticleController) Modify() {
 
 	//验证表单
 	if id == 0 {
-		c.Response(304, "ID missing", nil)
+		c.Response(303, "", nil)
 	}
 	valid := validation.Validation{}
 	valid.Required(ArticleForm.Title, "title")
@@ -246,7 +246,7 @@ func (c *ArticleController) Modify() {
 		}
 	} else {
 		logs.Error("没有文章被更新")
-		c.Response(603, "", nil)
+		c.Response(403, "", nil)
 	}
 	c.Response(200, "", nil)
 }
