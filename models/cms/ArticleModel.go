@@ -10,6 +10,7 @@ type ArticleModel struct {
 	Id            int64  `orm:"pk"`
 	Title         string `description:"标题"`
 	CategoryId    int    `description:"栏目ID"`
+	CategoryName  string `orm:"-"` // 栏目名，非数据库字段
 	Describe      string `description:"文章描述"`
 	Content       string `description:"正文"`
 	Status        int8   `description:"文章状态 1-可用 2-禁用 3-删除"`

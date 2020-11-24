@@ -80,6 +80,33 @@ func (c *ArticleController) List() {
 		logs.Error(Err)
 		c.Response(500, "", nil)
 	}
+
+	// 获取栏目名称
+	CategoryList := make(map[int]*cms.CategoryModel) // 缓存，避免单次的重复查询
+	for i, item := range Data.List {
+		if item.CategoryId != 0 {
+			// 先从内存中查找数据
+			if cate, ok := CategoryList[item.CategoryId]; ok {
+				Data.List[i].CategoryName = cate.Name
+			} else {
+				cate := cms.CategoryModel{Id: item.CategoryId}
+				err := o.Read(&cate)
+				if err == orm.ErrNoRows {
+					// 没有相应记录
+					c.Response(404, "", nil)
+					return
+				} else if err == orm.ErrMissPK {
+					// 主键丢失
+					logs.Error(orm.ErrMissPK)
+					c.Response(401, "", nil)
+					return
+				} else {
+					CategoryList[item.CategoryId] = &cate //赋值到map，避免重复查询
+					Data.List[i].CategoryName = cate.Name
+				}
+			}
+		}
+	}
 	logs.Info(Data)
 	c.Response(200, "", Data)
 }
