@@ -8,19 +8,19 @@ import (
 
 //栏目表模型
 type CategoryModel struct {
-	Id int `orm:"pk"`
-	ParentId int `description:"栏目父id"`
-	Status int8 `description:"状态;1:显示;2:隐藏" valid:"Range(0,2)"`
-	Sort float32 `description:"排序"`
-	Name string `description:"分类名称" valid:"Required"`
-	Description string `description:"分类描述"` 
-	Alias string `description:"分类别名" valid:"Required;AlphaNumeric"`
-	ListTpl string `description:"分类列表模板"` 
-	OneTpl string `description:"分类文章页模板"` 
-	CreateTime int64 `description:"创建时间"` 
-	Icon string `description:"分类图标"` 
-	Thumbnail int `description:"分类封面图"` 
-	More string `description:"扩展属性,格式为json"` 
+	Id          int     `orm:"pk"`
+	ParentId    int     `description:"栏目父id"`
+	Status      int8    `description:"状态;1:显示;2:隐藏" valid:"Range(0,2)"`
+	Sort        float32 `description:"排序"`
+	Name        string  `description:"分类名称" valid:"Required"`
+	Description string  `description:"分类描述"`
+	Alias       string  `description:"分类别名" valid:"Required;AlphaNumeric"`
+	ListTpl     string  `description:"分类列表模板"`
+	OneTpl      string  `description:"分类文章页模板"`
+	CreateTime  int64   `description:"创建时间"`
+	Icon        string  `description:"分类图标"`
+	Thumbnail   int     `description:"分类封面图"`
+	More        string  `description:"扩展属性,格式为json"`
 }
 
 //自定义表名
@@ -36,7 +36,7 @@ func init() {
 func UpdateCategory(data *CategoryModel) (int64, error) {
 	o := orm.NewOrm()
 	//查找对应ID的数据是否存在
-	cate := CategoryModel{Id:data.Id}
+	cate := CategoryModel{Id: data.Id}
 	err := o.Read(&cate)
 	if err == orm.ErrNoRows {
 		// 没有相应记录

@@ -124,14 +124,14 @@ func (c *ArticleController) Release() {
 	//验证表单
 	valid := validation.Validation{}
 	valid.Required(ArticleModel.Title, "title")
-	valid.Required(ArticleModel.CategoryId, "CategoryId")
-	valid.Required(ArticleModel.Content, "Content")
+	valid.Required(ArticleModel.CategoryId, "category_id")
+	valid.Required(ArticleModel.Content, "content")
 
 	if valid.HasErrors() {
 		// 如果有错误信息，证明验证没通过
 		// 打印错误信息
 		for _, err := range valid.Errors {
-			errMsg := err.Key + err.Message
+			errMsg := err.Key + " " + err.Message
 			logs.Info(errMsg)
 			c.Response(304, errMsg, nil)
 			break
@@ -254,6 +254,7 @@ func (c *ArticleController) Modify() {
 	ArticleForm.CommentCount = Article.CommentCount      //评论数
 	ArticleForm.Author = lib.CurrentUser.UserNickname    //作者
 	ArticleForm.StaffId = lib.CurrentUser.Id             //作者ID
+	ArticleForm.Status = Article.Status                  //作者ID
 	ArticleForm.Id = id
 
 	//保存数据
@@ -286,6 +287,9 @@ func (c *ArticleController) Delete() {
 		c.Response(500, getErr.Error(), nil)
 	}
 
+	c.Response(200, "", nil)
+	return
+
 	o := orm.NewOrm()
 	if num, err := o.Delete(&cms.ArticleModel{Id: id}); err == nil {
 		if num > 0 {
@@ -301,5 +305,30 @@ func (c *ArticleController) Delete() {
 		}
 	} else {
 		c.Response(500, err.Error(), nil)
+	}
+}
+
+// 获取一篇文章信息
+func (c *ArticleController) GetArticle() {
+	id, getErr := c.GetInt64("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	o := orm.NewOrm()
+	// 查找文章
+	Article := cms.ArticleModel{Id: id}
+	err := o.Read(&Article)
+
+	if err == orm.ErrNoRows {
+		logs.Error("查询不到")
+		c.Response(602, "", nil)
+	} else if err == orm.ErrMissPK {
+		logs.Error("找不到主键")
+		c.Response(401, "", nil)
+	} else {
+		Article.Content = html.UnescapeString(Article.Content)
+		c.Response(200, "", Article)
 	}
 }

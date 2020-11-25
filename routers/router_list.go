@@ -52,7 +52,13 @@ var RouterListInterface = []RouterList{
 	{
 		Router:     "/article/delete",
 		Controller: &cms.ArticleController{},
-		Method:     "post:Delete",
+		Method:     "get:Delete",
+	},
+	// 获取单篇文章
+	{
+		Router:     "/article/one",
+		Controller: &cms.ArticleController{},
+		Method:     "get:GetArticle",
 	},
 	//************************* 栏目 *************************//
 	// 栏目列表
