@@ -7,13 +7,18 @@ import (
 	"github.com/astaxie/beego/session"
 	"github.com/astaxie/beego/validation"
 	"go-admin/models/admin"
+	"os"
 	"reflect"
 	"unsafe"
 )
 
 //全局session
-var GlobalSessions *session.Manager
-var CurrentUser LoginUser
+var (
+	GlobalSessions *session.Manager
+	CurrentUser    LoginUser
+	AppPath        string //App运行目录
+	UploadPath     string // 文件上传路径
+)
 
 type LoginUser struct {
 	admin.UserModel
@@ -84,4 +89,10 @@ func StringToBytes(s string) []byte {
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
 	bh := reflect.SliceHeader{sh.Data, sh.Len, 0}
 	return *(*[]byte)(unsafe.Pointer(&bh))
+}
+
+// 判断文件或者目录是否存在
+func FileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil || os.IsExist(err)
 }

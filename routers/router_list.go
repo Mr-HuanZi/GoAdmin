@@ -13,6 +13,13 @@ type RouterList struct {
 }
 
 var RouterListInterface = []RouterList{
+	//************************* 公共 *************************//
+	{
+		// 单文件上传
+		Router:     "/upload",
+		Controller: &admin.FileUploadController{},
+		Method:     "post:UploadFile",
+	},
 	//************************* 登录 *************************//
 	{
 		Router:     "/login",

@@ -10,10 +10,17 @@ import (
 	_ "go-admin/routers"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
 func init() {
+	// 获取当前运行目录
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	lib.AppPath = dir // 把变量赋值给全局变量
 	// 初始化ORM
 	initOrmDriver()
 	//设置日志
@@ -37,6 +44,8 @@ func init() {
 		//如果设置，则允许共享身份验证凭据，例如cookie
 		AllowCredentials: true,
 	}))
+	// 文件上传初始化
+	initFileUpdateDriver()
 }
 
 func main() {
@@ -85,4 +94,19 @@ func initLogsDriver() {
 		return
 	}
 	logs.Async() //日志异步
+}
+
+// 初始化文件上传
+func initFileUpdateDriver() {
+	beego.BConfig.MaxMemory = 1 << 27
+	lib.UploadPath = filepath.Join(lib.AppPath, "upload") // 拼接路径
+
+	// 检查目录是否存在
+	if !lib.FileExists(lib.UploadPath) {
+		err := os.MkdirAll(lib.UploadPath, os.ModePerm)
+		if err != nil {
+			logs.Error(err)
+			os.Exit(-1) //创建目录失败则终止程序
+		}
+	}
 }

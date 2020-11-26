@@ -1,6 +1,7 @@
 /.idea
 /vendor
 /logs
+/upload
 
 .vs
 !.gitignore
