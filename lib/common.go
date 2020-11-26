@@ -7,6 +7,8 @@ import (
 	"github.com/astaxie/beego/session"
 	"github.com/astaxie/beego/validation"
 	"go-admin/models/admin"
+	"io"
+	"mime/multipart"
 	"os"
 	"reflect"
 	"unsafe"
@@ -30,18 +32,29 @@ type LoginUser struct {
 // @return string
 func Encryption(str string) string {
 	var appKey = "Bd9JNSMx9VyBRX,lho7z0gVRgyBD5f!9"
-	mdHash := md5.New()
-	mdHash.Write([]byte(str))
-	md5Byte := mdHash.Sum(nil)
-	md5Str := hex.EncodeToString(md5Byte)
+	md5Str := Md5(str)
 	rs := []rune(md5Str)          //把md5字符串转换成切片
 	start := string(rs[0:6])      //开头截取6位
 	end := string(rs[22:])        //结尾截取10位
 	md5Str = start + appKey + end //加盐拼接
-	mdHash.Write([]byte(md5Str))
-	md5Byte = mdHash.Sum(nil)
-	md5Str = hex.EncodeToString(md5Byte)
+	md5Str = Md5(md5Str)
 	return "###" + md5Str
+}
+
+// MD5加密封装
+func Md5(str string) string {
+	mdHash := md5.New()
+	mdHash.Write([]byte(str))
+	md5Byte := mdHash.Sum(nil)
+	return hex.EncodeToString(md5Byte)
+}
+
+// MD5文件加密封装
+// 注意，调用此方法可能会导致multipart.File所在的缓冲区被清空
+func Md5File(f multipart.File) string {
+	mdHash := md5.New()
+	_, _ = io.Copy(mdHash, f) // f所在的缓存区内容将被清空
+	return hex.EncodeToString(mdHash.Sum(nil))
 }
 
 func SessionInit() {

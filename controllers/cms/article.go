@@ -6,6 +6,7 @@ import (
 	"github.com/astaxie/beego/validation"
 	"go-admin/controllers/admin"
 	"go-admin/lib"
+	"go-admin/lib/easytime"
 	"go-admin/models/cms"
 	"html"
 	"time"
@@ -51,13 +52,13 @@ func (c *ArticleController) List() {
 
 	// 开始时间
 	if ArticleListSearchS.CreateTime[0] != "" {
-		stamp, _ := time.ParseInLocation("2006-01-02 15:04:05", ArticleListSearchS.CreateTime[0], time.Local)
+		stamp, _ := time.ParseInLocation(easytime.DatetimeFormat, ArticleListSearchS.CreateTime[0], time.Local)
 		qs = qs.Filter("create_time__gte", stamp.UnixNano()/1e6)
 	}
 
 	//结束时间
 	if ArticleListSearchS.CreateTime[1] != "" {
-		stamp, _ := time.ParseInLocation("2006-01-02 15:04:05", ArticleListSearchS.CreateTime[1], time.Local)
+		stamp, _ := time.ParseInLocation(easytime.DatetimeFormat, ArticleListSearchS.CreateTime[1], time.Local)
 		qs = qs.Filter("create_time__lte", stamp.UnixNano()/1e6)
 	}
 
@@ -152,14 +153,14 @@ func (c *ArticleController) Release() {
 	}
 
 	//初始化一些数据
-	ArticleModel.Status = 1                               //文章状态
-	ArticleModel.CreateTime = time.Now().UnixNano() / 1e6 //创建时间
-	ArticleModel.UpdateTime = ArticleModel.CreateTime     //更新时间
-	ArticleModel.PostHits = 0                             //查看数
-	ArticleModel.PostLike = 0                             //点赞数
-	ArticleModel.CommentCount = 0                         //评论数
-	ArticleModel.Author = lib.CurrentUser.UserNickname    //作者
-	ArticleModel.StaffId = lib.CurrentUser.Id             //作者ID
+	ArticleModel.Status = 1                            //文章状态
+	ArticleModel.CreateTime = easytime.UnixMilli()     //创建时间
+	ArticleModel.UpdateTime = ArticleModel.CreateTime  //更新时间
+	ArticleModel.PostHits = 0                          //查看数
+	ArticleModel.PostLike = 0                          //点赞数
+	ArticleModel.CommentCount = 0                      //评论数
+	ArticleModel.Author = lib.CurrentUser.UserNickname //作者
+	ArticleModel.StaffId = lib.CurrentUser.Id          //作者ID
 
 	//开启评论
 	if ArticleModel.CommentStatus != 0 {
@@ -248,13 +249,13 @@ func (c *ArticleController) Modify() {
 	}
 
 	//初始化一些数据,保持这些数据不被人为修改
-	ArticleForm.UpdateTime = time.Now().UnixNano() / 1e6 //更新时间
-	ArticleForm.PostHits = Article.PostHits              //查看数
-	ArticleForm.PostLike = Article.PostLike              //点赞数
-	ArticleForm.CommentCount = Article.CommentCount      //评论数
-	ArticleForm.Author = lib.CurrentUser.UserNickname    //作者
-	ArticleForm.StaffId = lib.CurrentUser.Id             //作者ID
-	ArticleForm.Status = Article.Status                  //作者ID
+	ArticleForm.UpdateTime = easytime.UnixMilli()     //更新时间
+	ArticleForm.PostHits = Article.PostHits           //查看数
+	ArticleForm.PostLike = Article.PostLike           //点赞数
+	ArticleForm.CommentCount = Article.CommentCount   //评论数
+	ArticleForm.Author = lib.CurrentUser.UserNickname //作者
+	ArticleForm.StaffId = lib.CurrentUser.Id          //作者ID
+	ArticleForm.Status = Article.Status               //作者ID
 	ArticleForm.Id = id
 
 	//保存数据
@@ -288,7 +289,6 @@ func (c *ArticleController) Delete() {
 	}
 
 	c.Response(200, "", nil)
-	return
 
 	o := orm.NewOrm()
 	if num, err := o.Delete(&cms.ArticleModel{Id: id}); err == nil {
