@@ -25,6 +25,7 @@ type ArticleModel struct {
 	Source        string `description:"来源" json:"source"`
 	Author        string `description:"作者" json:"author"`
 	StaffId       int64  `description:"作者ID" json:"staff_id"`
+	Recommend     int8   `description:"推荐位 000-默认 001-置顶 010-推荐" json:"recommend"`
 }
 
 //自定义表名

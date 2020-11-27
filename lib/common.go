@@ -3,6 +3,7 @@ package lib
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/session"
 	"github.com/astaxie/beego/validation"
@@ -108,4 +109,71 @@ func StringToBytes(s string) []byte {
 func FileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil || os.IsExist(err)
+}
+
+// 把结构体right的值复制给left
+// left interface{} 被修改的结构体
+// right interface{} 有数据的结构体
+func StructCopy(left interface{}, right interface{}) error {
+	lVal := reflect.ValueOf(left)
+	lValElem := lVal.Elem()
+	lValType := reflect.TypeOf(left)
+
+	rVal := reflect.ValueOf(right)
+	rValElem := rVal.Elem()
+	rValType := reflect.TypeOf(right)
+
+	if lValType.Kind() != reflect.Ptr || lValType.Elem().Kind() == reflect.Ptr || rValType.Kind() != reflect.Ptr || rValType.Elem().Kind() == reflect.Ptr {
+		return errors.New("type of parameters must be Ptr of value")
+	}
+
+	if lVal.IsNil() || rVal.IsNil() {
+		return errors.New("value of parameters should not be nil")
+	}
+
+	rTypeOfT := rValElem.Type()
+
+	for i := 0; i < rValElem.NumField(); i++ {
+		r := rTypeOfT.Field(i)
+		if r.Anonymous {
+			continue // 跳过嵌套结构体
+		}
+		lField := lValElem.FieldByName(r.Name)
+		rField := rValElem.FieldByName(r.Name)
+		if !lField.IsValid() {
+			continue
+		}
+
+		// 类型不相等不能赋值
+		if lField.Type() != rField.Type() {
+			continue
+		}
+		// 在要修改的结构体中查询有数据结构体中相同属性的字段，有则修改其值
+		lField.Set(reflect.ValueOf(rValElem.Field(i).Interface()))
+	}
+	return nil
+}
+
+// 位移标志
+// 用于单字段表示多状态时的状态改变
+// isWhat bool 启用/禁用 状态
+// bit int 状态预设值
+// flag int 当前状态
+// return int 改变后的flag
+func ShiftFlag(isWhat bool, bit int, flag int) int {
+	logs.Debug("*********************ShiftFlag*********************")
+	logs.Debug("%b", bit)
+	if isWhat {
+		flag |= bit
+		logs.Debug("%b", flag)
+	} else {
+		// 以下方法不保证准确性，还在测试阶段
+		flag |= bit // 先按位或，得到相反的值
+		logs.Debug("%b", flag)
+		flag ^= bit // 再按位异或，得到最终结果
+		logs.Debug("%b", flag)
+	}
+	logs.Debug("%b", flag)
+	logs.Debug("---------------------ShiftFlag---------------------")
+	return flag
 }

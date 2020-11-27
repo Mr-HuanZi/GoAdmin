@@ -12,8 +12,31 @@ import (
 	"time"
 )
 
+var (
+	TOP       = 0b001
+	RECOMMEND = 0b010
+)
+
 type ArticleController struct {
 	admin.BaseController
+}
+
+type ArticleFormS struct {
+	Title         string          `json:"title"`
+	CategoryId    int             `json:"category_id,string"`
+	Describe      string          `json:"describe"`
+	Content       string          `json:"content"`
+	Status        int8            `json:"status"`
+	CreateTime    int64           `json:"create_time"`
+	UpdateTime    int64           `json:"update_time"`
+	Tag           string          `json:"tag"`
+	PostHits      int64           `json:"post_hits,string"`
+	PostLike      int64           `json:"post_like,string"`
+	CommentCount  int64           `json:"comment_count,string"`
+	CommentStatus int             `json:"comment_status"`
+	More          string          `json:"more"`
+	Source        string          `json:"source"`
+	Recommend     map[string]bool `json:"recommend"`
 }
 
 func (c *ArticleController) List() {
@@ -46,8 +69,6 @@ func (c *ArticleController) List() {
 	//状态搜索
 	if ArticleListSearchS.Status != 0 {
 		qs = qs.Filter("status", ArticleListSearchS.Status)
-	} else {
-		qs = qs.Filter("status__in", 1, 2, 3)
 	}
 
 	// 开始时间
@@ -116,17 +137,19 @@ func (c *ArticleController) List() {
 func (c *ArticleController) Release() {
 	var (
 		ArticleModel = new(cms.ArticleModel)
+		ArticleForm  = new(ArticleFormS)
 	)
-	_ = c.GetRequestJson(&ArticleModel, true)
+	_ = c.GetRequestJson(&ArticleForm, true)
 
 	// 对内容进行转义
-	ArticleModel.Content = html.EscapeString(ArticleModel.Content)
+	ArticleForm.Content = html.EscapeString(ArticleForm.Content)
 
 	//验证表单
 	valid := validation.Validation{}
-	valid.Required(ArticleModel.Title, "title")
-	valid.Required(ArticleModel.CategoryId, "category_id")
-	valid.Required(ArticleModel.Content, "content")
+	valid.Required(ArticleForm.Title, "title")
+	valid.Required(ArticleForm.CategoryId, "category_id")
+	valid.Required(ArticleForm.Content, "content")
+	valid.Range(ArticleForm.Status, 0, 2, "status")
 
 	if valid.HasErrors() {
 		// 如果有错误信息，证明验证没通过
@@ -141,7 +164,7 @@ func (c *ArticleController) Release() {
 
 	//确认栏目ID是否存在
 	cateOrm := orm.NewOrm()
-	cate := cms.CategoryModel{Id: ArticleModel.CategoryId}
+	cate := cms.CategoryModel{Id: ArticleForm.CategoryId}
 	cateReadErr := cateOrm.Read(&cate)
 
 	if cateReadErr == orm.ErrNoRows {
@@ -152,8 +175,15 @@ func (c *ArticleController) Release() {
 		c.Response(500, cateReadErr.Error(), nil)
 	}
 
+	// 把ArticleForm的值赋值给ArticleModel
+	StructCopyErr := lib.StructCopy(ArticleModel, ArticleForm)
+	if StructCopyErr != nil {
+		logs.Error(StructCopyErr)
+		c.Response(500, "", nil)
+		return
+	}
+
 	//初始化一些数据
-	ArticleModel.Status = 1                            //文章状态
 	ArticleModel.CreateTime = easytime.UnixMilli()     //创建时间
 	ArticleModel.UpdateTime = ArticleModel.CreateTime  //更新时间
 	ArticleModel.PostHits = 0                          //查看数
@@ -195,7 +225,8 @@ func (c *ArticleController) Modify() {
 		c.Response(500, getErr.Error(), nil)
 	}
 	var (
-		ArticleForm = new(cms.ArticleModel)
+		ArticleModel = new(cms.ArticleModel)
+		ArticleForm  = new(ArticleFormS)
 	)
 	_ = c.GetRequestJson(&ArticleForm, true)
 
@@ -245,21 +276,44 @@ func (c *ArticleController) Modify() {
 		c.Response(601, "", nil)
 	} else if cateReadErr != nil {
 		logs.Info(cateReadErr.Error())
-		c.Response(500, cateReadErr.Error(), nil)
+		c.Response(500, "", nil)
+	}
+
+	// 计算状态
+	flag := int(Article.Recommend)
+	if _, ok := ArticleForm.Recommend["top"]; ok {
+		if ArticleForm.Recommend["top"] {
+			flag = lib.ShiftFlag(true, TOP, flag)
+		} else {
+			flag = lib.ShiftFlag(false, TOP, flag)
+		}
+	}
+	if _, ok := ArticleForm.Recommend["recommend"]; ok {
+		if ArticleForm.Recommend["recommend"] {
+			flag = lib.ShiftFlag(true, RECOMMEND, flag)
+		} else {
+			flag = lib.ShiftFlag(false, RECOMMEND, flag)
+		}
+	}
+
+	// 把ArticleForm的值赋值给ArticleModel
+	StructCopyErr := lib.StructCopy(ArticleModel, ArticleForm)
+	if StructCopyErr != nil {
+		logs.Error(StructCopyErr)
+		c.Response(500, "", nil)
+		return
 	}
 
 	//初始化一些数据,保持这些数据不被人为修改
-	ArticleForm.UpdateTime = easytime.UnixMilli()     //更新时间
-	ArticleForm.PostHits = Article.PostHits           //查看数
-	ArticleForm.PostLike = Article.PostLike           //点赞数
-	ArticleForm.CommentCount = Article.CommentCount   //评论数
-	ArticleForm.Author = lib.CurrentUser.UserNickname //作者
-	ArticleForm.StaffId = lib.CurrentUser.Id          //作者ID
-	ArticleForm.Status = Article.Status               //作者ID
-	ArticleForm.Id = id
+	ArticleModel.CreateTime = Article.CreateTime       //新增时间
+	ArticleModel.UpdateTime = easytime.UnixMilli()     //更新时间
+	ArticleModel.Author = lib.CurrentUser.UserNickname //作者
+	ArticleModel.StaffId = lib.CurrentUser.Id          //作者ID
+	ArticleModel.Recommend = int8(flag)                //推荐位
+	ArticleModel.Id = id
 
 	//保存数据
-	UpdateNum, UpdateErr := o.Update(ArticleForm)
+	UpdateNum, UpdateErr := o.Update(ArticleModel)
 	if UpdateErr != nil {
 		logs.Error(UpdateErr)
 		c.Response(500, "", nil)
@@ -329,6 +383,19 @@ func (c *ArticleController) GetArticle() {
 		c.Response(401, "", nil)
 	} else {
 		Article.Content = html.UnescapeString(Article.Content)
-		c.Response(200, "", Article)
+		ArticleData := new(ArticleFormS)
+		// 把Article的值赋值给ArticleData
+		StructCopyErr := lib.StructCopy(ArticleData, &Article)
+		if StructCopyErr != nil {
+			logs.Error(StructCopyErr)
+			c.Response(500, "", nil)
+			return
+		}
+
+		// 推荐位
+		ArticleData.Recommend = make(map[string]bool)
+		ArticleData.Recommend["top"] = int(Article.Recommend)&TOP == TOP
+		ArticleData.Recommend["recommend"] = int(Article.Recommend)&RECOMMEND == RECOMMEND
+		c.Response(200, "", ArticleData)
 	}
 }
