@@ -14,13 +14,6 @@ type CategoryController struct {
 	admin.BaseController
 }
 
-// 栏目搜索结构体
-type CategoryListSearch struct {
-	Name  string
-	Limit int `valid:"Range(0, 1000)"` //分页每页显示的条数
-	Page  int `valid:"Min(1)"`         //当前页码
-}
-
 type CategoryListResult struct {
 	Total int64
 	List  []*cms.CategoryModel
@@ -29,11 +22,15 @@ type CategoryListResult struct {
 // 栏目列表
 func (c *CategoryController) List() {
 	var (
-		CategoryListSearchS CategoryListSearch
-		Category            = new(cms.CategoryModel)
-		Err                 error
-		Data                = new(CategoryListResult)
-		offset              int
+		CategoryListSearchS = &struct {
+			Name  string
+			Limit int `valid:"Range(0, 1000)"` //分页每页显示的条数
+			Page  int `valid:"Min(1)"`         //当前页码
+		}{}
+		Category = new(cms.CategoryModel)
+		Err      error
+		Data     = new(CategoryListResult)
+		offset   int
 	)
 	_ = c.GetRequestJson(&CategoryListSearchS, false)
 
@@ -156,4 +153,27 @@ func (c *CategoryController) Delete() {
 	} else {
 		c.Response(500, err.Error(), nil)
 	}
+}
+
+func (c *CategoryController) GetCategory() {
+	id, getErr := c.GetInt("id")
+	if getErr != nil {
+		logs.Error(getErr.Error())
+		c.Response(500, getErr.Error(), nil)
+	}
+
+	// 查询栏目
+	o := orm.NewOrm()
+	Category := cms.CategoryModel{Id: id}
+	err := o.Read(Category)
+	if err == orm.ErrNoRows {
+		logs.Error("查询不到")
+		c.Response(602, "", nil)
+	} else if err == orm.ErrMissPK {
+		logs.Error("找不到主键")
+		c.Response(401, "", nil)
+	} else {
+		c.Response(200, "", Category)
+	}
+
 }
