@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var (
+const (
 	TOP       = 0b001
 	RECOMMEND = 0b010
 )
