@@ -8,19 +8,19 @@ import (
 
 //栏目表模型
 type CategoryModel struct {
-	Id          int     `orm:"pk"`
-	ParentId    int     `description:"栏目父id"`
-	Status      int8    `description:"状态;1:显示;2:隐藏" valid:"Range(0,2)"`
-	Sort        float32 `description:"排序"`
-	Name        string  `description:"分类名称" valid:"Required"`
-	Description string  `description:"分类描述"`
-	Alias       string  `description:"分类别名" valid:"Required;AlphaNumeric"`
-	ListTpl     string  `description:"分类列表模板"`
-	OneTpl      string  `description:"分类文章页模板"`
-	CreateTime  int64   `description:"创建时间"`
-	Icon        string  `description:"分类图标"`
-	Thumbnail   int     `description:"分类封面图"`
-	More        string  `description:"扩展属性,格式为json"`
+	Id          int     `orm:"pk" json:"id,string"`
+	ParentId    int     `description:"栏目父id" json:"parent_id,string"`
+	Status      int8    `description:"状态;1:显示;2:隐藏" valid:"Range(0,2)" json:"status"`
+	Sort        float32 `description:"排序" json:"sort,string"`
+	Name        string  `description:"分类名称" valid:"Required" json:"name"`
+	Description string  `description:"分类描述" json:"description"`
+	Alias       string  `description:"分类别名" valid:"Required;AlphaNumeric" json:"alias"`
+	ListTpl     string  `description:"分类列表模板" json:"list_tpl"`
+	OneTpl      string  `description:"分类文章页模板" json:"one_tpl"`
+	CreateTime  int64   `description:"创建时间" json:"create_time"`
+	Icon        string  `description:"分类图标" json:"icon"`
+	Thumbnail   int     `description:"分类封面图" json:"thumbnail"`
+	More        string  `description:"扩展属性,格式为json" json:"more"`
 }
 
 //自定义表名

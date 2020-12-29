@@ -76,7 +76,7 @@ var RouterListInterface = []RouterList{
 	},
 	// 新增栏目
 	{
-		Router:     "/category/add",
+		Router:     "/category/create",
 		Controller: &cms.CategoryController{},
 		Method:     "post:Add",
 	},
@@ -91,6 +91,12 @@ var RouterListInterface = []RouterList{
 		Router:     "/category/delete",
 		Controller: &cms.CategoryController{},
 		Method:     "post:Delete",
+	},
+	// 获取单个栏目
+	{
+		Router:     "/category/:id([0-9]+)",
+		Controller: &cms.CategoryController{},
+		Method:     "get:GetCategory",
 	},
 	//************************* 用户 *************************//
 	// 用户列表

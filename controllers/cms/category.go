@@ -6,6 +6,7 @@ import (
 	"go-admin/controllers/admin"
 	"go-admin/lib"
 	"go-admin/models/cms"
+	"strconv"
 	"time"
 )
 
@@ -95,6 +96,8 @@ func (c *CategoryController) Add() {
 		//有重复
 		c.Response(600, "", nil)
 	}
+	c.Response(200, "", nil)
+	return
 	_, errInsert := o.Insert(CategoryForm)
 	if errInsert != nil {
 		logs.Error(errInsert)
@@ -155,8 +158,13 @@ func (c *CategoryController) Delete() {
 	}
 }
 
+// 获取单个栏目信息
 func (c *CategoryController) GetCategory() {
-	id, getErr := c.GetInt("id")
+	strv := c.Ctx.Input.Param(":id")
+	if len(strv) <= 0 {
+		c.Response(500, "", nil)
+	}
+	id, getErr := strconv.Atoi(strv)
 	if getErr != nil {
 		logs.Error(getErr.Error())
 		c.Response(500, getErr.Error(), nil)
@@ -165,7 +173,7 @@ func (c *CategoryController) GetCategory() {
 	// 查询栏目
 	o := orm.NewOrm()
 	Category := cms.CategoryModel{Id: id}
-	err := o.Read(Category)
+	err := o.Read(&Category)
 	if err == orm.ErrNoRows {
 		logs.Error("查询不到")
 		c.Response(602, "", nil)
