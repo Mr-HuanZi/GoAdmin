@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"github.com/astaxie/beego"
+	beego "github.com/beego/beego/v2/server/web"
 	"go-admin/controllers/admin"
 	"go-admin/controllers/cms"
 )
@@ -94,7 +94,7 @@ var RouterListInterface = []RouterList{
 	},
 	// 获取单个栏目
 	{
-		Router:     "/category/:id([0-9]+)",
+		Router:     "/category/:id:int",
 		Controller: &cms.CategoryController{},
 		Method:     "get:GetCategory",
 	},

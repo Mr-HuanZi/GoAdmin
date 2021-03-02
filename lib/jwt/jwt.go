@@ -1,8 +1,8 @@
 package jwt
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	beego "github.com/beego/beego/v2/server/web"
 	"github.com/dgrijalva/jwt-go"
 	"strconv"
 	"time"
@@ -20,7 +20,7 @@ type MyCustomClaims struct {
 
 //生成用户令牌
 func GenerateUserToken(uid int64) (string, error) {
-	expireSecondsConf := beego.AppConfig.String("jwt::expireSeconds")
+	expireSecondsConf, _ := beego.AppConfig.String("jwt::expireSeconds")
 	var expireSeconds int
 	if s, err := strconv.Atoi(expireSecondsConf); err == nil {
 		expireSeconds = s

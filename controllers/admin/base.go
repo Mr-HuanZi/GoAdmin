@@ -3,8 +3,8 @@ package admin
 import (
 	"encoding/json"
 	"errors"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
+	beego "github.com/beego/beego/v2/server/web"
 	"go-admin/lib"
 	"go-admin/lib/jwt"
 	"go-admin/lib/rule"
@@ -30,7 +30,7 @@ func (base *BaseController) Prepare() {
 	//验证登录
 	var checkLogin = true
 	var ruleExclude []string
-	ruleExcludeConf := beego.AppConfig.String("rule::ruleExclude")
+	ruleExcludeConf, _ := beego.AppConfig.String("rule::ruleExclude")
 	if i := strings.Index(ruleExcludeConf, ","); i != -1 {
 		ruleExclude = strings.Split(ruleExcludeConf, ",")
 	} else {
@@ -92,7 +92,7 @@ func (base *BaseController) Response(code int, msg string, data interface{}) {
 	//	base.Ctx.Output.Status = 401
 	//}
 	base.Data["json"] = &statusCode
-	base.ServeJSON()
+	_ = base.ServeJSON()
 	if code != 100 && code != 200 {
 		// 调用StopRun方法后不会再执行Finish方法，因此这里需要手动调用
 		go sys_logs.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
@@ -150,7 +150,7 @@ func (base *BaseController) getLoginUser(uid int64) error {
 func (base *BaseController) LimitDef(l int) int {
 	var Err error
 	if l <= 0 {
-		limit := beego.AppConfig.String("cms::limit")
+		limit, _ := beego.AppConfig.String("cms::limit")
 		l, Err = strconv.Atoi(limit)
 		if Err != nil {
 			logs.Error(Err)

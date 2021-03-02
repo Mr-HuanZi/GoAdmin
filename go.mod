@@ -1,12 +1,11 @@
 module go-admin
 
-go 1.13
+go 1.16
 
-require (
-	github.com/astaxie/beego v1.12.1
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/go-sql-driver/mysql v1.4.1
-	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
-	github.com/smartystreets/goconvey v1.6.4
-	google.golang.org/appengine v1.6.5 // indirect
-)
+require github.com/beego/beego/v2 v2.0.1
+
+require github.com/smartystreets/goconvey v1.6.4
+
+require github.com/dgrijalva/jwt-go v3.2.0+incompatible
+
+require github.com/astaxie/beego v1.12.3

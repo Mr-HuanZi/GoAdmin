@@ -1,8 +1,8 @@
 package admin
 
 import (
-	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego/orm"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"go-admin/lib"
 	"go-admin/lib/easytime"
 	"go-admin/models/admin"

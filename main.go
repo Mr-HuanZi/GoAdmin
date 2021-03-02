@@ -1,17 +1,16 @@
 package main
 
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego/orm"
-	"github.com/astaxie/beego/plugins/cors"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	"go-admin/lib"
 	_ "go-admin/routers"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	beego "github.com/beego/beego/v2/server/web"
 )
 
 func init() {
@@ -27,7 +26,6 @@ func init() {
 	initLogsDriver()
 	//初始化session
 	beego.BConfig.WebConfig.Session.SessionOn = true
-	lib.SessionInit()
 	//跨域处理
 	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
 		//允许访问的源
@@ -58,11 +56,11 @@ func main() {
 
 // 初始化ORM
 func initOrmDriver() {
-	dbUser := beego.AppConfig.String("db::dbUser")
-	dbPass := beego.AppConfig.String("db::dbPass")
-	dbHost := beego.AppConfig.String("db::dbHost")
-	dbPort := beego.AppConfig.String("db::dbPort")
-	dbName := beego.AppConfig.String("db::dbName")
+	dbUser, _ := beego.AppConfig.String("db::dbUser")
+	dbPass, _ := beego.AppConfig.String("db::dbPass")
+	dbHost, _ := beego.AppConfig.String("db::dbHost")
+	dbPort, _ := beego.AppConfig.String("db::dbPort")
+	dbName, _ := beego.AppConfig.String("db::dbName")
 	dbStr := dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8"
 	orm.Debug = true
 	// 输出到文件

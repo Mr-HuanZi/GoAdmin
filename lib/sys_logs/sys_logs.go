@@ -2,9 +2,9 @@ package sys_logs
 
 import (
 	"encoding/json"
-	"github.com/astaxie/beego/context"
-	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego/orm"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web/context"
 	"go-admin/lib"
 	"go-admin/models/admin"
 	"time"

@@ -4,9 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego/session"
-	"github.com/astaxie/beego/validation"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/validation"
 	"go-admin/models/admin"
 	"io"
 	"mime/multipart"
@@ -17,7 +16,6 @@ import (
 
 //全局session
 var (
-	GlobalSessions *session.Manager
 	CurrentUser    LoginUser
 	AppPath        string //App运行目录
 	UploadPath     string // 文件上传路径
@@ -56,20 +54,6 @@ func Md5File(f multipart.File) string {
 	mdHash := md5.New()
 	_, _ = io.Copy(mdHash, f) // f所在的缓存区内容将被清空
 	return hex.EncodeToString(mdHash.Sum(nil))
-}
-
-func SessionInit() {
-	sessionConfig := &session.ManagerConfig{
-		CookieName:      "gosessionid",
-		EnableSetCookie: true,
-		Gclifetime:      3600,
-		Maxlifetime:     3600,
-		Secure:          false,
-		CookieLifeTime:  3600,
-		ProviderConfig:  "./tmp",
-	}
-	GlobalSessions, _ = session.NewManager("memory", sessionConfig)
-	go GlobalSessions.GC()
 }
 
 //验证表单数据

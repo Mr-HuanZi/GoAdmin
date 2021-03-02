@@ -2,8 +2,8 @@ package admin
 
 // 权限模型
 import (
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
+	"github.com/beego/beego/v2/client/orm"
+	beego "github.com/beego/beego/v2/server/web"
 )
 
 // 权限组和用户对应表
