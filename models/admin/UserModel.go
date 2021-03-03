@@ -39,7 +39,11 @@ type UserModel struct {
 
 func init() {
 	//设置表前缀并且注册模型
-	orm.RegisterModelWithPrefix(beego.AppConfig.String("db::dbPrefix"), new(UserModel))
+	dbPrefix, err := beego.AppConfig.String("db::dbPrefix")
+	if err != nil {
+		logs.Error(err)
+	}
+	orm.RegisterModelWithPrefix(dbPrefix, new(UserModel))
 }
 
 //自定义表名

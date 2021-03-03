@@ -3,6 +3,7 @@ package admin
 // 权限模型
 import (
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
 )
 
@@ -37,7 +38,11 @@ type RuleModel struct {
 
 func init() {
 	//设置表前缀并且注册模型
-	orm.RegisterModelWithPrefix(beego.AppConfig.String("db::dbPrefix"), new(RuleModel), new(AuthGroupAccessModel), new(AuthGroupModel))
+	dbPrefix, err := beego.AppConfig.String("db::dbPrefix")
+	if err != nil {
+		logs.Error(err)
+	}
+	orm.RegisterModelWithPrefix(dbPrefix, new(RuleModel), new(AuthGroupAccessModel), new(AuthGroupModel))
 }
 
 //自定义表名

@@ -30,7 +30,11 @@ func (Category *CategoryModel) TableName() string {
 
 func init() {
 	//设置表前缀并且注册模型
-	orm.RegisterModelWithPrefix(beego.AppConfig.String("db::dbPrefix"), new(CategoryModel))
+	dbPrefix, err := beego.AppConfig.String("db::dbPrefix")
+	if err != nil {
+		logs.Error(err)
+	}
+	orm.RegisterModelWithPrefix(dbPrefix, new(CategoryModel))
 }
 
 func UpdateCategory(data *CategoryModel) (int64, error) {
