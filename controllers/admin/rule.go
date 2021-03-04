@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/lib"
 	"go-admin/models/admin"
+	"go-admin/utils"
 	"strconv"
 	"strings"
 	"time"
@@ -66,7 +66,7 @@ func (c *RuleController) Add() {
 
 	o := orm.NewOrm()
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = lib.FormValidation(RuleForm)
+	validateRes, validateMsg = utils.FormValidation(RuleForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -83,7 +83,7 @@ func (c *RuleController) Add() {
 
 	// 初始化一些字段
 	RuleForm.CreateTime = time.Now().Unix()
-	RuleForm.AddStaff = lib.CurrentUser.Id
+	RuleForm.AddStaff = utils.CurrentUser.Id
 	RuleForm.Id = 0
 
 	// 写入数据
@@ -115,7 +115,7 @@ func (c *RuleController) Modify() {
 	if id == 0 {
 		c.Response(303, "", nil)
 	}
-	validateRes, validateMsg = lib.FormValidation(RuleForm)
+	validateRes, validateMsg = utils.FormValidation(RuleForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -180,7 +180,7 @@ func (c *RuleController) WriteGroup() {
 	_ = c.GetRequestJson(&groupForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg := lib.FormValidation(groupForm)
+	validateRes, validateMsg := utils.FormValidation(groupForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -277,7 +277,7 @@ func (c *RuleController) AccessAuth() {
 	_ = c.GetRequestJson(&rulesJson, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg := lib.FormValidation(rulesJson)
+	validateRes, validateMsg := utils.FormValidation(rulesJson)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}

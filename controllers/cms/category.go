@@ -4,8 +4,8 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"go-admin/controllers/admin"
-	"go-admin/lib"
 	"go-admin/models/cms"
+	"go-admin/utils"
 	"strconv"
 	"time"
 )
@@ -73,7 +73,7 @@ func (c *CategoryController) Add() {
 	_ = c.GetRequestJson(&CategoryForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = lib.FormValidation(CategoryForm)
+	validateRes, validateMsg = utils.FormValidation(CategoryForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -123,7 +123,7 @@ func (c *CategoryController) Modify() {
 	if id == 0 {
 		c.Response(303, "", nil)
 	}
-	validateRes, validateMsg = lib.FormValidation(CategoryForm)
+	validateRes, validateMsg = utils.FormValidation(CategoryForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}

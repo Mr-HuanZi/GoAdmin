@@ -1,4 +1,4 @@
-package status_code
+package utils
 
 type StatusCode struct {
 	Code int

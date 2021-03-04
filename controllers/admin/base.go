@@ -5,12 +5,8 @@ import (
 	"errors"
 	"github.com/beego/beego/v2/core/logs"
 	beego "github.com/beego/beego/v2/server/web"
-	"go-admin/lib"
-	"go-admin/lib/jwt"
-	"go-admin/lib/rule"
-	"go-admin/lib/status_code"
-	"go-admin/lib/sys_logs"
 	"go-admin/models/admin"
+	"go-admin/utils"
 	"strconv"
 	"strings"
 )
@@ -20,7 +16,7 @@ type BaseController struct {
 }
 
 //实例化日志模块
-var StatusCodeInstance status_code.StatusCode
+var StatusCodeInstance utils.StatusCode
 
 // 基类初始化方法，每次执行都会被调用
 func (base *BaseController) Prepare() {
@@ -54,7 +50,7 @@ func (base *BaseController) Prepare() {
 			// 直接返回登录失败
 			base.Response(103, "", nil)
 		}
-		b, t := jwt.ValidateUserToken(Authorization)
+		b, t := utils.ValidateUserToken(Authorization)
 		if !b {
 			//token验证失败
 			base.Response(103, "", nil)
@@ -65,7 +61,7 @@ func (base *BaseController) Prepare() {
 				base.Response(500, getUserErr.Error(), nil) //令牌生成失败
 			}
 			// 刷新令牌
-			token, tokenErr := jwt.RefreshUserToken(t)
+			token, tokenErr := utils.RefreshUserToken(t)
 			if tokenErr != nil {
 				base.Response(101, "", nil) //令牌生成失败
 			}
@@ -81,7 +77,7 @@ func (base *BaseController) Prepare() {
 
 // 执行完相应的 HTTP Method 方法之后执行
 func (base *BaseController) Finish() {
-	go sys_logs.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
+	go utils.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
 }
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
@@ -95,7 +91,7 @@ func (base *BaseController) Response(code int, msg string, data interface{}) {
 	_ = base.ServeJSON()
 	if code != 100 && code != 200 {
 		// 调用StopRun方法后不会再执行Finish方法，因此这里需要手动调用
-		go sys_logs.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
+		go utils.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
 		base.StopRun()
 	}
 }
@@ -114,7 +110,7 @@ func (base *BaseController) GetRequestJson(s interface{}, stopRequest bool) erro
 			return errors.New("input is empty")
 		}
 	}
-	logs.Debug("RequestBody:", lib.BytesToString(data))
+	logs.Debug("RequestBody:", utils.BytesToString(data))
 	jsonErr := json.Unmarshal(data, s)
 	if jsonErr != nil {
 		logs.Error("json.Unmarshal is err:", jsonErr.Error())
@@ -131,7 +127,7 @@ func (base *BaseController) getLoginUser(uid int64) error {
 		base.Response(500, "", nil)
 	}
 	var getUserErr error
-	lib.CurrentUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
+	utils.CurrentUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
 	if getUserErr != nil {
 		logs.Error(getUserErr.Error())
 		base.Response(500, "", nil)
@@ -139,9 +135,9 @@ func (base *BaseController) getLoginUser(uid int64) error {
 	}
 
 	if uid == userAdministrator {
-		lib.CurrentUser.IsRoot = true
+		utils.CurrentUser.IsRoot = true
 	} else {
-		lib.CurrentUser.IsRoot = false
+		utils.CurrentUser.IsRoot = false
 	}
 	return nil
 }
@@ -186,5 +182,5 @@ func (base *BaseController) initRule() {
 	// 获取当前的请求URL
 	logs.Info(base.Ctx.Input.URI())
 	logs.Info(base.Ctx.Input.Param(":id"))
-	rule.Check("", lib.CurrentUser.Id, false)
+	utils.Check("", utils.CurrentUser.Id, false)
 }

@@ -2,9 +2,8 @@ package admin
 
 import (
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/lib"
-	"go-admin/lib/jwt"
 	"go-admin/models/admin"
+	"go-admin/utils"
 	"time"
 )
 
@@ -37,18 +36,18 @@ func (c *LoginController) Login() {
 	)
 	_ = c.GetRequestJson(&loginForm, true)
 	/* 表单字段验证 Start */
-	vaildRes, vaildMsg = lib.FormValidation(&loginForm)
+	vaildRes, vaildMsg = utils.FormValidation(&loginForm)
 	if !vaildRes {
 		c.Response(304, vaildMsg, nil)
 	}
 	/* 表单字段验证 End */
 	//对密码加密
-	loginForm.Password = lib.Encryption(loginForm.Password)
+	loginForm.Password = utils.Encryption(loginForm.Password)
 	//验证用户登录
 	code, uid = admin.Login(loginForm.Username, loginForm.Password)
 	if code == 100 {
 		//登录成功
-		token, tokenErr := jwt.GenerateUserToken(uid) //获取登录令牌
+		token, tokenErr := utils.GenerateUserToken(uid) //获取登录令牌
 		if tokenErr != nil {
 			c.Response(101, "", nil) //令牌生成失败
 		}
@@ -77,7 +76,7 @@ func (c *LoginController) Register() {
 	)
 	_ = c.GetRequestJson(&registerForm, true)
 	//验证表单
-	vaildRes, vaildMsg = lib.FormValidation(&registerForm)
+	vaildRes, vaildMsg = utils.FormValidation(&registerForm)
 	if !vaildRes {
 		c.Response(304, vaildMsg, nil)
 	}
@@ -93,12 +92,12 @@ func (c *LoginController) Register() {
 	var UserData admin.UserModel
 	var uid int64
 	UserData.UserLogin = registerForm.Username
-	UserData.UserPass = lib.Encryption(registerForm.Password) //加密密码
-	UserData.UserNickname = registerForm.Username             //用户昵称默认是登录账号
-	UserData.UserType = 1                                     //管理员类型
-	UserData.CreateTime = time.Now().Unix()                   //管理员类型
-	UserData.UpdateTime = UserData.CreateTime                 //管理员类型
-	UserData.UserStatus = 1                                   //用户状态
+	UserData.UserPass = utils.Encryption(registerForm.Password) //加密密码
+	UserData.UserNickname = registerForm.Username               //用户昵称默认是登录账号
+	UserData.UserType = 1                                       //管理员类型
+	UserData.CreateTime = time.Now().Unix()                     //管理员类型
+	UserData.UpdateTime = UserData.CreateTime                   //管理员类型
+	UserData.UserStatus = 1                                     //用户状态
 	uid = admin.CreateUser(&UserData)
 	if uid != 0 {
 		logs.Info(uid)

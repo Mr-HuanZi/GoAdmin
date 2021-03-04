@@ -5,9 +5,8 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/core/validation"
 	"go-admin/controllers/admin"
-	"go-admin/lib"
-	"go-admin/lib/easytime"
 	"go-admin/models/cms"
+	"go-admin/utils"
 	"html"
 	"time"
 )
@@ -73,13 +72,13 @@ func (c *ArticleController) List() {
 
 	// 开始时间
 	if ArticleListSearchS.CreateTime[0] != "" {
-		stamp, _ := time.ParseInLocation(easytime.DatetimeFormat, ArticleListSearchS.CreateTime[0], time.Local)
+		stamp, _ := time.ParseInLocation(utils.DatetimeFormat, ArticleListSearchS.CreateTime[0], time.Local)
 		qs = qs.Filter("create_time__gte", stamp.UnixNano()/1e6)
 	}
 
 	//结束时间
 	if ArticleListSearchS.CreateTime[1] != "" {
-		stamp, _ := time.ParseInLocation(easytime.DatetimeFormat, ArticleListSearchS.CreateTime[1], time.Local)
+		stamp, _ := time.ParseInLocation(utils.DatetimeFormat, ArticleListSearchS.CreateTime[1], time.Local)
 		qs = qs.Filter("create_time__lte", stamp.UnixNano()/1e6)
 	}
 
@@ -176,7 +175,7 @@ func (c *ArticleController) Release() {
 	}
 
 	// 把ArticleForm的值赋值给ArticleModel
-	StructCopyErr := lib.StructCopy(ArticleModel, ArticleForm)
+	StructCopyErr := utils.StructCopy(ArticleModel, ArticleForm)
 	if StructCopyErr != nil {
 		logs.Error(StructCopyErr)
 		c.Response(500, "", nil)
@@ -184,13 +183,13 @@ func (c *ArticleController) Release() {
 	}
 
 	//初始化一些数据
-	ArticleModel.CreateTime = easytime.UnixMilli()     //创建时间
-	ArticleModel.UpdateTime = ArticleModel.CreateTime  //更新时间
-	ArticleModel.PostHits = 0                          //查看数
-	ArticleModel.PostLike = 0                          //点赞数
-	ArticleModel.CommentCount = 0                      //评论数
-	ArticleModel.Author = lib.CurrentUser.UserNickname //作者
-	ArticleModel.StaffId = lib.CurrentUser.Id          //作者ID
+	ArticleModel.CreateTime = utils.UnixMilli()          //创建时间
+	ArticleModel.UpdateTime = ArticleModel.CreateTime    //更新时间
+	ArticleModel.PostHits = 0                            //查看数
+	ArticleModel.PostLike = 0                            //点赞数
+	ArticleModel.CommentCount = 0                        //评论数
+	ArticleModel.Author = utils.CurrentUser.UserNickname //作者
+	ArticleModel.StaffId = utils.CurrentUser.Id          //作者ID
 
 	//开启评论
 	if ArticleModel.CommentStatus != 0 {
@@ -283,21 +282,21 @@ func (c *ArticleController) Modify() {
 	flag := int(Article.Recommend)
 	if _, ok := ArticleForm.Recommend["top"]; ok {
 		if ArticleForm.Recommend["top"] {
-			flag = lib.ShiftFlag(true, TOP, flag)
+			flag = utils.ShiftFlag(true, TOP, flag)
 		} else {
-			flag = lib.ShiftFlag(false, TOP, flag)
+			flag = utils.ShiftFlag(false, TOP, flag)
 		}
 	}
 	if _, ok := ArticleForm.Recommend["recommend"]; ok {
 		if ArticleForm.Recommend["recommend"] {
-			flag = lib.ShiftFlag(true, RECOMMEND, flag)
+			flag = utils.ShiftFlag(true, RECOMMEND, flag)
 		} else {
-			flag = lib.ShiftFlag(false, RECOMMEND, flag)
+			flag = utils.ShiftFlag(false, RECOMMEND, flag)
 		}
 	}
 
 	// 把ArticleForm的值赋值给ArticleModel
-	StructCopyErr := lib.StructCopy(ArticleModel, ArticleForm)
+	StructCopyErr := utils.StructCopy(ArticleModel, ArticleForm)
 	if StructCopyErr != nil {
 		logs.Error(StructCopyErr)
 		c.Response(500, "", nil)
@@ -305,11 +304,11 @@ func (c *ArticleController) Modify() {
 	}
 
 	//初始化一些数据,保持这些数据不被人为修改
-	ArticleModel.CreateTime = Article.CreateTime       //新增时间
-	ArticleModel.UpdateTime = easytime.UnixMilli()     //更新时间
-	ArticleModel.Author = lib.CurrentUser.UserNickname //作者
-	ArticleModel.StaffId = lib.CurrentUser.Id          //作者ID
-	ArticleModel.Recommend = int8(flag)                //推荐位
+	ArticleModel.CreateTime = Article.CreateTime         //新增时间
+	ArticleModel.UpdateTime = utils.UnixMilli()          //更新时间
+	ArticleModel.Author = utils.CurrentUser.UserNickname //作者
+	ArticleModel.StaffId = utils.CurrentUser.Id          //作者ID
+	ArticleModel.Recommend = int8(flag)                  //推荐位
 	ArticleModel.Id = id
 
 	//保存数据
@@ -385,7 +384,7 @@ func (c *ArticleController) GetArticle() {
 		Article.Content = html.UnescapeString(Article.Content)
 		ArticleData := new(ArticleFormS)
 		// 把Article的值赋值给ArticleData
-		StructCopyErr := lib.StructCopy(ArticleData, &Article)
+		StructCopyErr := utils.StructCopy(ArticleData, &Article)
 		if StructCopyErr != nil {
 			logs.Error(StructCopyErr)
 			c.Response(500, "", nil)

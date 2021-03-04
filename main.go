@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/lib"
 	_ "go-admin/routers"
 	"go-admin/utils"
 	"log"
@@ -96,11 +95,11 @@ func initLogsDriver() {
 // 初始化文件上传
 func initFileUpdateDriver() {
 	beego.BConfig.MaxMemory = 1 << 27
-	lib.UploadPath = filepath.Join(lib.AppPath, "upload") // 拼接路径
+	utils.UploadPath = filepath.Join(utils.AppPath, "upload") // 拼接路径
 
 	// 检查目录是否存在
-	if !lib.FileExists(lib.UploadPath) {
-		err := os.MkdirAll(lib.UploadPath, os.ModePerm)
+	if !utils.FileExists(utils.UploadPath) {
+		err := os.MkdirAll(utils.UploadPath, os.ModePerm)
 		if err != nil {
 			logs.Error(err)
 			os.Exit(-1) //创建目录失败则终止程序

@@ -1,11 +1,10 @@
-package sys_logs
+package utils
 
 import (
 	"encoding/json"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web/context"
-	"go-admin/lib"
 	"go-admin/models/admin"
 	"time"
 )
@@ -25,9 +24,9 @@ func WriteSysLogs(logType int8, logText string, Input *context.BeegoInput, more 
 		Param:      "",
 	}
 
-	if lib.CurrentUser.Id > 0 {
-		logsData.UserId = lib.CurrentUser.Id
-		logsData.Username = lib.CurrentUser.UserLogin
+	if CurrentUser.Id > 0 {
+		logsData.UserId = CurrentUser.Id
+		logsData.Username = CurrentUser.UserLogin
 	}
 
 	// 处理请求数据
@@ -62,7 +61,7 @@ func WriteSysLogs(logType int8, logText string, Input *context.BeegoInput, more 
 		logs.Warning("json.Marshal is err:", jsonMarshalErr.Error())
 		logsData.Param = ""
 	} else {
-		logsData.Param = lib.BytesToString(moreJson)
+		logsData.Param = BytesToString(moreJson)
 	}
 
 	// 写库

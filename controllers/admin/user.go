@@ -3,8 +3,8 @@ package admin
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/lib"
 	"go-admin/models/admin"
+	"go-admin/utils"
 	"time"
 )
 
@@ -82,7 +82,7 @@ func (c *UserController) CreateUser() {
 	_ = c.GetRequestJson(&UserForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = lib.FormValidation(UserForm)
+	validateRes, validateMsg = utils.FormValidation(UserForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -95,7 +95,7 @@ func (c *UserController) CreateUser() {
 	UserForm.UserStatus = 1
 	UserForm.UserType = 1 //管理员类型
 	// 密码加密
-	UserForm.UserPass = lib.Encryption(UserForm.UserPass)
+	UserForm.UserPass = utils.Encryption(UserForm.UserPass)
 
 	// 检查用户名是否存在
 	duplication := admin.CheckUserDuplication(UserForm.UserLogin)
@@ -134,7 +134,7 @@ func (c *UserController) Modify() {
 		c.Response(304, "ID missing", nil)
 	}
 
-	validateRes, validateMsg = lib.FormValidation(UserForm)
+	validateRes, validateMsg = utils.FormValidation(UserForm)
 	if !validateRes {
 		c.Response(304, validateMsg, nil)
 	}
@@ -153,7 +153,7 @@ func (c *UserController) Modify() {
 	}
 
 	// 密码加密
-	UserForm.UserPass = lib.Encryption(UserForm.UserPass)
+	UserForm.UserPass = utils.Encryption(UserForm.UserPass)
 
 	// 不能被修改的数据
 	UserForm.CreateTime = User.CreateTime
@@ -220,24 +220,24 @@ func (c *UserController) changeUserStatus(status int8) {
 
 // 获取当前用户信息
 func (c *UserController) FetchCurrentUser() {
-	if lib.CurrentUser.Id != 0 {
+	if utils.CurrentUser.Id != 0 {
 		user := make(map[string]interface{})
-		user["userId"] = lib.CurrentUser.Id
-		user["nickname"] = lib.CurrentUser.UserNickname
-		user["username"] = lib.CurrentUser.UserLogin
-		user["email"] = lib.CurrentUser.UserEmail
-		user["birthday"] = lib.CurrentUser.Birthday
-		user["mobile"] = lib.CurrentUser.Mobile
-		if lib.CurrentUser.Sex == 1 {
+		user["userId"] = utils.CurrentUser.Id
+		user["nickname"] = utils.CurrentUser.UserNickname
+		user["username"] = utils.CurrentUser.UserLogin
+		user["email"] = utils.CurrentUser.UserEmail
+		user["birthday"] = utils.CurrentUser.Birthday
+		user["mobile"] = utils.CurrentUser.Mobile
+		if utils.CurrentUser.Sex == 1 {
 			user["sex"] = "男"
-		} else if lib.CurrentUser.Sex == 2 {
+		} else if utils.CurrentUser.Sex == 2 {
 			user["sex"] = "女"
 		} else {
 			user["sex"] = "保密"
 		}
-		user["signature"] = lib.CurrentUser.Signature
-		user["user_url"] = lib.CurrentUser.UserUrl
-		user["avatar"] = lib.CurrentUser.Avatar
+		user["signature"] = utils.CurrentUser.Signature
+		user["user_url"] = utils.CurrentUser.UserUrl
+		user["avatar"] = utils.CurrentUser.Avatar
 		c.Response(200, "", user)
 	} else {
 		c.Response(200, "", nil)
