@@ -57,19 +57,14 @@ func (c *RuleController) List() {
 
 func (c *RuleController) Add() {
 	var (
-		RuleForm    admin.RuleModel
-		validateMsg string
-		validateRes bool
+		RuleForm admin.RuleModel
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
 
 	o := orm.NewOrm()
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = utils.FormValidation(RuleForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(RuleForm)
 	// 检查重复项
 	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Count()
 	if ruleCountErr != nil {
@@ -103,9 +98,7 @@ func (c *RuleController) Modify() {
 	}
 
 	var (
-		RuleForm    admin.RuleModel
-		validateMsg string
-		validateRes bool
+		RuleForm admin.RuleModel
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
@@ -115,10 +108,7 @@ func (c *RuleController) Modify() {
 	if id == 0 {
 		c.Response(303, "", nil)
 	}
-	validateRes, validateMsg = utils.FormValidation(RuleForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(RuleForm)
 	// 检查相同的记录
 	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Exclude("id", id).Count()
 	if ruleCountErr != nil {
@@ -180,10 +170,7 @@ func (c *RuleController) WriteGroup() {
 	_ = c.GetRequestJson(&groupForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg := utils.FormValidation(groupForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(groupForm)
 	/* 表单字段验证 End */
 
 	o := orm.NewOrm()
@@ -277,10 +264,7 @@ func (c *RuleController) AccessAuth() {
 	_ = c.GetRequestJson(&rulesJson, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg := utils.FormValidation(rulesJson)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(rulesJson)
 	/* 表单字段验证 End */
 
 	// 尝试分割字符串

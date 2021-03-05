@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
 	"go-admin/models/admin"
 	"go-admin/utils"
@@ -183,4 +184,26 @@ func (base *BaseController) initRule() {
 	logs.Info(base.Ctx.Input.URI())
 	logs.Info(base.Ctx.Input.Param(":id"))
 	utils.Check("", utils.CurrentUser.Id, false)
+}
+
+//验证表单数据
+func (base *BaseController) FormValidation(validData interface{}) {
+	v := validation.Validation{}
+	b, err := v.Valid(validData)
+	if err != nil {
+		// handle error
+		logs.Error(err.Error())
+		return
+	}
+
+	//结果验证
+	if !b {
+		for _, err := range v.Errors {
+			logs.Info(err.Key, err.Message)
+			base.Response(304, err.Message, nil)
+			// 终止app运行
+			base.StopRun()
+			return
+		}
+	}
 }

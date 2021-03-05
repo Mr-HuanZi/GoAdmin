@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/beego/beego/v2/core/logs"
-	"github.com/beego/beego/v2/core/validation"
 	"go-admin/models/admin"
 	"io"
 	"log"
@@ -85,27 +84,6 @@ func Md5File(f multipart.File) string {
 	mdHash := md5.New()
 	_, _ = io.Copy(mdHash, f) // f所在的缓存区内容将被清空
 	return hex.EncodeToString(mdHash.Sum(nil))
-}
-
-//验证表单数据
-func FormValidation(validData interface{}) (bool, string) {
-	valid := validation.Validation{}
-	b, err := valid.Valid(validData)
-	if err != nil {
-		// handle error
-		logs.Error(err.Error())
-		return false, err.Error()
-	}
-
-	//结果验证
-	if !b {
-		for _, err := range valid.Errors {
-			msg := err.Field + " " + err.Message
-			logs.Info(err.Key, err.Message)
-			return false, msg
-		}
-	}
-	return true, ""
 }
 
 func BytesToString(b []byte) string {

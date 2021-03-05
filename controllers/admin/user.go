@@ -74,18 +74,13 @@ func (c *UserController) List() {
 // 创建用户(管理员)
 func (c *UserController) CreateUser() {
 	var (
-		UserForm    admin.UserModel
-		validateMsg string
-		validateRes bool
+		UserForm admin.UserModel
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = utils.FormValidation(UserForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(UserForm)
 	/* 表单字段验证 End */
 
 	// 初始化一些字段
@@ -122,9 +117,7 @@ func (c *UserController) Modify() {
 	}
 
 	var (
-		UserForm    admin.UserModel
-		validateMsg string
-		validateRes bool
+		UserForm admin.UserModel
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
@@ -133,11 +126,7 @@ func (c *UserController) Modify() {
 	if id == 0 {
 		c.Response(304, "ID missing", nil)
 	}
-
-	validateRes, validateMsg = utils.FormValidation(UserForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(UserForm)
 	/* 表单字段验证 End */
 	o := orm.NewOrm()
 	// 查找文章

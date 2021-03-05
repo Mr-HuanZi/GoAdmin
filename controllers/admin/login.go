@@ -29,17 +29,12 @@ type RegisterFormS struct {
 func (c *LoginController) Login() {
 	var (
 		loginForm LoginFormS
-		vaildMsg  string
-		vaildRes  bool
 		code      int
 		uid       int64
 	)
 	_ = c.GetRequestJson(&loginForm, true)
 	/* 表单字段验证 Start */
-	vaildRes, vaildMsg = utils.FormValidation(&loginForm)
-	if !vaildRes {
-		c.Response(304, vaildMsg, nil)
-	}
+	c.FormValidation(&loginForm)
 	/* 表单字段验证 End */
 	//对密码加密
 	loginForm.Password = utils.Encryption(loginForm.Password)
@@ -71,15 +66,10 @@ func (c *LoginController) Test() {
 func (c *LoginController) Register() {
 	var (
 		registerForm RegisterFormS
-		vaildMsg     string
-		vaildRes     bool
 	)
 	_ = c.GetRequestJson(&registerForm, true)
 	//验证表单
-	vaildRes, vaildMsg = utils.FormValidation(&registerForm)
-	if !vaildRes {
-		c.Response(304, vaildMsg, nil)
-	}
+	c.FormValidation(&registerForm)
 	//确认密码是否相等
 	if registerForm.Password != registerForm.RePassword {
 		c.Response(105, "", nil) //设置的密码与确认密码不一致

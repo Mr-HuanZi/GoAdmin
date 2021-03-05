@@ -5,7 +5,6 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"go-admin/controllers/admin"
 	"go-admin/models/cms"
-	"go-admin/utils"
 	"strconv"
 	"time"
 )
@@ -67,16 +66,11 @@ func (c *CategoryController) List() {
 func (c *CategoryController) Add() {
 	var (
 		CategoryForm = new(cms.CategoryModel)
-		validateMsg  string
-		validateRes  bool
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
 
 	/* 表单字段验证 Start */
-	validateRes, validateMsg = utils.FormValidation(CategoryForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(CategoryForm)
 	/* 表单字段验证 End */
 
 	//初始化一些数据
@@ -96,8 +90,6 @@ func (c *CategoryController) Add() {
 		//有重复
 		c.Response(600, "", nil)
 	}
-	c.Response(200, "", nil)
-	return
 	_, errInsert := o.Insert(CategoryForm)
 	if errInsert != nil {
 		logs.Error(errInsert)
@@ -114,8 +106,6 @@ func (c *CategoryController) Modify() {
 	}
 	var (
 		CategoryForm = new(cms.CategoryModel)
-		validateMsg  string
-		validateRes  bool
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
 
@@ -123,10 +113,7 @@ func (c *CategoryController) Modify() {
 	if id == 0 {
 		c.Response(303, "", nil)
 	}
-	validateRes, validateMsg = utils.FormValidation(CategoryForm)
-	if !validateRes {
-		c.Response(304, validateMsg, nil)
-	}
+	c.FormValidation(CategoryForm)
 	/* 表单字段验证 End */
 	CategoryForm.Id = id
 	num, err := cms.UpdateCategory(CategoryForm)
