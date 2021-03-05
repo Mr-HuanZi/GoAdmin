@@ -16,12 +16,12 @@ import (
 )
 
 func init() {
+	// 获取当前运行目录
+	utils.GetAppPath()
 	// 初始化日志
 	initLogsDriver()
 	// 初始化ORM
 	initOrmDriver()
-	// 获取当前运行目录
-	utils.GetAppPath()
 	//初始化session
 	beego.BConfig.WebConfig.Session.SessionOn = true
 	//跨域处理
