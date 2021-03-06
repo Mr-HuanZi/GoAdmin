@@ -5,7 +5,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/server/web/context"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"time"
 )
 
@@ -13,7 +13,7 @@ import (
 // @logType 日志类型 1-登录日志 2-操作日志
 // @content 日志详情
 func WriteSysLogs(logType int8, logText string, Input *context.BeegoInput, more string) {
-	logsData := admin.SystemLogsModel{
+	logsData := models.SystemLogsModel{
 		Type:       logType,
 		CreateTime: time.Now().Unix(),
 		Ip:         Input.IP(),

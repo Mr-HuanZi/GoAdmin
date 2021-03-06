@@ -1,9 +1,9 @@
-package admin
+package controllers
 
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"go-admin/utils"
 	"time"
 )
@@ -22,7 +22,7 @@ type SearchForm struct {
 
 type ListResult struct {
 	Total int64
-	List  []*admin.UserModel
+	List  []*models.UserModel
 }
 
 // 用户列表
@@ -30,7 +30,7 @@ func (c *UserController) List() {
 	var (
 		SearchFormInstance SearchForm
 		Data               = new(ListResult)
-		UserModel          = new(admin.UserModel)
+		UserModel          = new(models.UserModel)
 		Err                error
 		offset             int
 	)
@@ -74,7 +74,7 @@ func (c *UserController) List() {
 // 创建用户(管理员)
 func (c *UserController) CreateUser() {
 	var (
-		UserForm admin.UserModel
+		UserForm models.UserModel
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
@@ -93,7 +93,7 @@ func (c *UserController) CreateUser() {
 	UserForm.UserPass = utils.Encryption(UserForm.UserPass)
 
 	// 检查用户名是否存在
-	duplication := admin.CheckUserDuplication(UserForm.UserLogin)
+	duplication := models.CheckUserDuplication(UserForm.UserLogin)
 	if duplication {
 		c.Response(107, "", nil)
 	}
@@ -117,7 +117,7 @@ func (c *UserController) Modify() {
 	}
 
 	var (
-		UserForm admin.UserModel
+		UserForm models.UserModel
 	)
 
 	_ = c.GetRequestJson(&UserForm, true)
@@ -130,7 +130,7 @@ func (c *UserController) Modify() {
 	/* 表单字段验证 End */
 	o := orm.NewOrm()
 	// 查找文章
-	User := admin.UserModel{Id: id}
+	User := models.UserModel{Id: id}
 	err := o.Read(&User)
 
 	if err == orm.ErrNoRows {
@@ -154,7 +154,7 @@ func (c *UserController) Modify() {
 
 	// 如果修改了用户名，检查用户名是否存在
 	if UserForm.UserLogin != User.UserLogin {
-		duplication := admin.CheckUserDuplication(UserForm.UserLogin)
+		duplication := models.CheckUserDuplication(UserForm.UserLogin)
 		if duplication {
 			c.Response(107, "", nil)
 		}
@@ -197,7 +197,7 @@ func (c *UserController) changeUserStatus(status int8) {
 	}
 	/* 表单字段验证 End */
 
-	updateNum, updateErr := admin.ChangeUserStatus(UidMap["Uid"], status)
+	updateNum, updateErr := models.ChangeUserStatus(UidMap["Uid"], status)
 	if updateErr != nil {
 		c.Response(500, "", nil)
 	}

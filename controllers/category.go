@@ -1,22 +1,21 @@
-package cms
+package controllers
 
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/controllers/admin"
-	"go-admin/models/cms"
+	"go-admin/models"
 	"strconv"
 	"time"
 )
 
 // 文章栏目
 type CategoryController struct {
-	admin.BaseController
+	BaseController
 }
 
 type CategoryListResult struct {
 	Total int64
-	List  []*cms.CategoryModel
+	List  []*models.CategoryModel
 }
 
 // 栏目列表
@@ -27,7 +26,7 @@ func (c *CategoryController) List() {
 			Limit int `valid:"Range(0, 1000)"` //分页每页显示的条数
 			Page  int `valid:"Min(1)"`         //当前页码
 		}{}
-		Category = new(cms.CategoryModel)
+		Category = new(models.CategoryModel)
 		Err      error
 		Data     = new(CategoryListResult)
 		offset   int
@@ -65,7 +64,7 @@ func (c *CategoryController) List() {
 // 新增栏目
 func (c *CategoryController) Add() {
 	var (
-		CategoryForm = new(cms.CategoryModel)
+		CategoryForm = new(models.CategoryModel)
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
 
@@ -81,7 +80,7 @@ func (c *CategoryController) Add() {
 
 	o := orm.NewOrm()
 	//查找相同的别名
-	cnt, errCount := o.QueryTable(new(cms.CategoryModel)).Filter("alias", CategoryForm.Alias).Count()
+	cnt, errCount := o.QueryTable(new(models.CategoryModel)).Filter("alias", CategoryForm.Alias).Count()
 	if errCount != nil {
 		logs.Error(errCount)
 		c.Response(500, "", nil)
@@ -105,7 +104,7 @@ func (c *CategoryController) Modify() {
 		c.Response(500, getErr.Error(), nil)
 	}
 	var (
-		CategoryForm = new(cms.CategoryModel)
+		CategoryForm = new(models.CategoryModel)
 	)
 	_ = c.GetRequestJson(&CategoryForm, true)
 
@@ -116,7 +115,7 @@ func (c *CategoryController) Modify() {
 	c.FormValidation(CategoryForm)
 	/* 表单字段验证 End */
 	CategoryForm.Id = id
-	num, err := cms.UpdateCategory(CategoryForm)
+	num, err := models.UpdateCategory(CategoryForm)
 
 	if err != nil {
 		c.Response(500, "", nil)
@@ -134,7 +133,7 @@ func (c *CategoryController) Delete() {
 	}
 
 	o := orm.NewOrm()
-	if num, err := o.Delete(&cms.CategoryModel{Id: id}); err == nil {
+	if num, err := o.Delete(&models.CategoryModel{Id: id}); err == nil {
 		if num > 0 {
 			c.Response(200, "", nil)
 		} else {
@@ -159,7 +158,7 @@ func (c *CategoryController) GetCategory() {
 
 	// 查询栏目
 	o := orm.NewOrm()
-	Category := cms.CategoryModel{Id: id}
+	Category := models.CategoryModel{Id: id}
 	err := o.Read(&Category)
 	if err == orm.ErrNoRows {
 		logs.Error("查询不到")

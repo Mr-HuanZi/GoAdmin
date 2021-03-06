@@ -1,4 +1,4 @@
-package admin
+package models
 
 // 权限模型
 import (

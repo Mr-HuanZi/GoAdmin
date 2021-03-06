@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"io"
 	"log"
 	"mime/multipart"
@@ -24,7 +24,7 @@ var (
 )
 
 type LoginUser struct {
-	admin.UserModel
+	models.UserModel
 	IsRoot bool
 }
 

@@ -1,4 +1,4 @@
-package admin
+package controllers
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/core/validation"
 	beego "github.com/beego/beego/v2/server/web"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"go-admin/utils"
 	"strconv"
 )
@@ -107,7 +107,7 @@ func (base *BaseController) getLoginUser(uid int64) error {
 		base.Response(500, "", nil)
 	}
 	var getUserErr error
-	utils.CurrentUser.UserModel, getUserErr = admin.GetUser(uid) // 查询用户
+	utils.CurrentUser.UserModel, getUserErr = models.GetUser(uid) // 查询用户
 	if getUserErr != nil {
 		logs.Error(getUserErr.Error())
 		base.Response(500, "", nil)

@@ -1,11 +1,10 @@
-package cms
+package controllers
 
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/beego/beego/v2/core/validation"
-	"go-admin/controllers/admin"
-	"go-admin/models/cms"
+	"go-admin/models"
 	"go-admin/utils"
 	"html"
 	"time"
@@ -17,7 +16,7 @@ const (
 )
 
 type ArticleController struct {
-	admin.BaseController
+	BaseController
 }
 
 type ArticleFormS struct {
@@ -50,10 +49,10 @@ func (c *ArticleController) List() {
 		}{}
 		Data = &struct {
 			Total int64
-			List  []*cms.ArticleModel
+			List  []*models.ArticleModel
 		}{}
 		Err     error
-		Article = new(cms.ArticleModel)
+		Article = new(models.ArticleModel)
 		offset  int
 	)
 	_ = c.GetRequestJson(&ArticleListSearchS, false)
@@ -103,14 +102,14 @@ func (c *ArticleController) List() {
 	}
 
 	// 获取栏目名称
-	CategoryList := make(map[int]*cms.CategoryModel) // 缓存，避免单次的重复查询
+	CategoryList := make(map[int]*models.CategoryModel) // 缓存，避免单次的重复查询
 	for i, item := range Data.List {
 		if item.CategoryId != 0 {
 			// 先从内存中查找数据
 			if cate, ok := CategoryList[item.CategoryId]; ok {
 				Data.List[i].CategoryName = cate.Name
 			} else {
-				cate := cms.CategoryModel{Id: item.CategoryId}
+				cate := models.CategoryModel{Id: item.CategoryId}
 				err := o.Read(&cate)
 				if err == orm.ErrNoRows {
 					// 没有相应记录
@@ -135,7 +134,7 @@ func (c *ArticleController) List() {
 //发布新文章
 func (c *ArticleController) Release() {
 	var (
-		ArticleModel = new(cms.ArticleModel)
+		ArticleModel = new(models.ArticleModel)
 		ArticleForm  = new(ArticleFormS)
 	)
 	_ = c.GetRequestJson(&ArticleForm, true)
@@ -163,7 +162,7 @@ func (c *ArticleController) Release() {
 
 	//确认栏目ID是否存在
 	cateOrm := orm.NewOrm()
-	cate := cms.CategoryModel{Id: ArticleForm.CategoryId}
+	cate := models.CategoryModel{Id: ArticleForm.CategoryId}
 	cateReadErr := cateOrm.Read(&cate)
 
 	if cateReadErr == orm.ErrNoRows {
@@ -206,9 +205,9 @@ func (c *ArticleController) Release() {
 		c.Response(500, "", nil)
 	}
 	// 更新文章与栏目关联表
-	Article := cms.ArticleModel{Id: id}
+	Article := models.ArticleModel{Id: id}
 	_ = o.Read(&Article) // 查询最新的数据
-	upErr := cms.UpdateCategoryArticles(Article, cate)
+	upErr := models.UpdateCategoryArticles(Article, cate)
 	if upErr != nil {
 		logs.Error(upErr.Error())
 		c.Response(500, "", nil)
@@ -224,7 +223,7 @@ func (c *ArticleController) Modify() {
 		c.Response(500, getErr.Error(), nil)
 	}
 	var (
-		ArticleModel = new(cms.ArticleModel)
+		ArticleModel = new(models.ArticleModel)
 		ArticleForm  = new(ArticleFormS)
 	)
 	_ = c.GetRequestJson(&ArticleForm, true)
@@ -254,7 +253,7 @@ func (c *ArticleController) Modify() {
 
 	o := orm.NewOrm()
 	// 查找文章
-	Article := cms.ArticleModel{Id: id}
+	Article := models.ArticleModel{Id: id}
 	err := o.Read(&Article)
 
 	if err == orm.ErrNoRows {
@@ -267,7 +266,7 @@ func (c *ArticleController) Modify() {
 
 	//确认栏目ID是否存在
 	cateOrm := orm.NewOrm()
-	cate := cms.CategoryModel{Id: ArticleForm.CategoryId}
+	cate := models.CategoryModel{Id: ArticleForm.CategoryId}
 	cateReadErr := cateOrm.Read(&cate)
 
 	if cateReadErr == orm.ErrNoRows {
@@ -319,9 +318,9 @@ func (c *ArticleController) Modify() {
 	}
 	if UpdateNum > 0 {
 		// 更新文章与栏目关联表
-		Article = cms.ArticleModel{Id: id}
+		Article = models.ArticleModel{Id: id}
 		_ = o.Read(&Article) // 查询最新的数据
-		upErr := cms.UpdateCategoryArticles(Article, cate)
+		upErr := models.UpdateCategoryArticles(Article, cate)
 		if upErr != nil {
 			logs.Error(upErr.Error())
 			c.Response(500, "", nil)
@@ -344,10 +343,10 @@ func (c *ArticleController) Delete() {
 	c.Response(200, "", nil)
 
 	o := orm.NewOrm()
-	if num, err := o.Delete(&cms.ArticleModel{Id: id}); err == nil {
+	if num, err := o.Delete(&models.ArticleModel{Id: id}); err == nil {
 		if num > 0 {
 			// 删除关联表
-			_, delErr := o.Delete(&cms.CategoryArticlesModel{ArticlesId: id})
+			_, delErr := o.Delete(&models.CategoryArticlesModel{ArticlesId: id})
 			if delErr != nil {
 				// 如果出错了也不中断
 				logs.Error(delErr)
@@ -371,7 +370,7 @@ func (c *ArticleController) GetArticle() {
 
 	o := orm.NewOrm()
 	// 查找文章
-	Article := cms.ArticleModel{Id: id}
+	Article := models.ArticleModel{Id: id}
 	err := o.Read(&Article)
 
 	if err == orm.ErrNoRows {

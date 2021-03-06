@@ -1,9 +1,9 @@
-package admin
+package controllers
 
 import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"go-admin/utils"
 	"os"
 	"path"
@@ -35,7 +35,7 @@ func (c *FileUploadController) UploadFile() {
 	}()
 
 	// 文件信息
-	var asset admin.AssetModel
+	var asset models.AssetModel
 	asset.Status = 1
 	asset.FileInfo = h.Filename
 	asset.Size = h.Size

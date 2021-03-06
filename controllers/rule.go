@@ -1,10 +1,10 @@
-package admin
+package controllers
 
 import (
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"go-admin/utils"
 	"strconv"
 	"strings"
@@ -24,7 +24,7 @@ func (c *RuleController) List() {
 	}{}
 	listResult := &struct {
 		Total int64
-		List  []*admin.RuleModel
+		List  []*models.RuleModel
 	}{}
 	if parseFormErr := c.ParseForm(search); parseFormErr != nil {
 		logs.Error(parseFormErr.Error())
@@ -35,7 +35,7 @@ func (c *RuleController) List() {
 	search.Limit, search.Page, search.offset = c.Paginate(search.Page, search.Limit)
 
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(admin.RuleModel))
+	qs := o.QueryTable(new(models.RuleModel))
 
 	// 获取总条目
 	cnt, errCount := qs.Count()
@@ -57,7 +57,7 @@ func (c *RuleController) List() {
 
 func (c *RuleController) Add() {
 	var (
-		RuleForm admin.RuleModel
+		RuleForm models.RuleModel
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
@@ -66,7 +66,7 @@ func (c *RuleController) Add() {
 	/* 表单字段验证 Start */
 	c.FormValidation(RuleForm)
 	// 检查重复项
-	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Count()
+	ruleCount, ruleCountErr := o.QueryTable(new(models.RuleModel)).Filter("rule", RuleForm.Rule).Count()
 	if ruleCountErr != nil {
 		logs.Error(ruleCountErr)
 		c.Response(500, ruleCountErr.Error(), nil)
@@ -98,7 +98,7 @@ func (c *RuleController) Modify() {
 	}
 
 	var (
-		RuleForm admin.RuleModel
+		RuleForm models.RuleModel
 	)
 
 	_ = c.GetRequestJson(&RuleForm, true)
@@ -110,7 +110,7 @@ func (c *RuleController) Modify() {
 	}
 	c.FormValidation(RuleForm)
 	// 检查相同的记录
-	ruleCount, ruleCountErr := o.QueryTable(new(admin.RuleModel)).Filter("rule", RuleForm.Rule).Exclude("id", id).Count()
+	ruleCount, ruleCountErr := o.QueryTable(new(models.RuleModel)).Filter("rule", RuleForm.Rule).Exclude("id", id).Count()
 	if ruleCountErr != nil {
 		logs.Error(ruleCountErr)
 		c.Response(500, ruleCountErr.Error(), nil)
@@ -120,7 +120,7 @@ func (c *RuleController) Modify() {
 	}
 	/* 表单字段验证 End */
 	// 查找文章
-	Rule := admin.RuleModel{Id: id}
+	Rule := models.RuleModel{Id: id}
 	err := o.Read(&Rule)
 
 	if err == orm.ErrNoRows {
@@ -147,7 +147,7 @@ func (c *RuleController) Modify() {
 // 写入权限组数据
 func (c *RuleController) WriteGroup() {
 	var (
-		AuthGroup admin.AuthGroupModel
+		AuthGroup models.AuthGroupModel
 		id        int
 		AtoiErr   error
 	)
@@ -224,7 +224,7 @@ func (c *RuleController) DeleteGroup() {
 	}
 
 	o := orm.NewOrm()
-	if num, err := o.Delete(&admin.AuthGroupModel{Id: id}); err == nil {
+	if num, err := o.Delete(&models.AuthGroupModel{Id: id}); err == nil {
 		if num > 0 {
 			c.Response(200, "", nil)
 		} else {
@@ -245,7 +245,7 @@ func (c *RuleController) AccessAuth() {
 	}
 
 	// 查询组是否存在
-	AuthGroup := admin.AuthGroupModel{Id: id}
+	AuthGroup := models.AuthGroupModel{Id: id}
 	o := orm.NewOrm()
 	readErr := o.Read(&AuthGroup)
 	if readErr == orm.ErrNoRows {
@@ -309,7 +309,7 @@ func (c *RuleController) MemberAuth() {
 		c.Response(500, "", nil)
 	}
 	// 查询组是否存在
-	AuthGroup := admin.AuthGroupModel{Id: id}
+	AuthGroup := models.AuthGroupModel{Id: id}
 	o := orm.NewOrm()
 	readErr := o.Read(&AuthGroup)
 	if readErr == orm.ErrNoRows {
@@ -337,7 +337,7 @@ func (c *RuleController) MemberAuth() {
 	// 检查当前组是否已有这些人员的授权
 	var list orm.ParamsList
 	// 获取当前组的授权人员
-	_, err := o.QueryTable(new(admin.AuthGroupAccessModel)).Filter("group_id", id).ValuesFlat(&list, "uid")
+	_, err := o.QueryTable(new(models.AuthGroupAccessModel)).Filter("group_id", id).ValuesFlat(&list, "uid")
 	if err != nil {
 		c.Response(500, "", nil)
 	}
@@ -368,10 +368,10 @@ func (c *RuleController) MemberAuth() {
 
 	logs.Info(resUid)
 	if len(resUid) > 0 {
-		var authGroupAccess []admin.AuthGroupAccessModel
+		var authGroupAccess []models.AuthGroupAccessModel
 		// 插入新数据
 		for _, uid := range resUid {
-			authGroupAccess = append(authGroupAccess, admin.AuthGroupAccessModel{Uid: uid, GroupId: id})
+			authGroupAccess = append(authGroupAccess, models.AuthGroupAccessModel{Uid: uid, GroupId: id})
 		}
 		logs.Info(authGroupAccess)
 
@@ -413,7 +413,7 @@ func (c *RuleController) RemoveMemberAuth() {
 
 	// 删除数据
 	o := orm.NewOrm()
-	delNum, delErr := o.QueryTable(new(admin.AuthGroupAccessModel)).Filter("group_id", id).Filter("uid__in", postJson["Uid"]).Delete()
+	delNum, delErr := o.QueryTable(new(models.AuthGroupAccessModel)).Filter("group_id", id).Filter("uid__in", postJson["Uid"]).Delete()
 	if delErr != nil {
 		c.Response(500, "", nil)
 	}

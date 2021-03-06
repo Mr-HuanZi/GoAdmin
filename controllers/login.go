@@ -1,8 +1,8 @@
-package admin
+package controllers
 
 import (
 	"github.com/beego/beego/v2/core/logs"
-	"go-admin/models/admin"
+	"go-admin/models"
 	"go-admin/utils"
 	"time"
 )
@@ -39,7 +39,7 @@ func (c *LoginController) Login() {
 	//对密码加密
 	loginForm.Password = utils.Encryption(loginForm.Password)
 	//验证用户登录
-	code, uid = admin.Login(loginForm.Username, loginForm.Password)
+	code, uid = models.Login(loginForm.Username, loginForm.Password)
 	if code == 100 {
 		//登录成功
 		token, tokenErr := utils.GenerateUserToken(uid) //获取登录令牌
@@ -49,7 +49,7 @@ func (c *LoginController) Login() {
 		// 获取用户信息
 		_ = c.getLoginUser(uid)
 		//记录用户登录信息
-		admin.UpdateUserLoginInfo(uid, c.Ctx.Input.IP())
+		models.UpdateUserLoginInfo(uid, c.Ctx.Input.IP())
 		c.Ctx.SetCookie("Authorization", token, 7200, "/", "", false, true)
 		c.Ctx.Output.Header("Authorization", token)
 		//记录session
@@ -75,11 +75,11 @@ func (c *LoginController) Register() {
 		c.Response(105, "", nil) //设置的密码与确认密码不一致
 	}
 	//检查用户名和邮箱是否已被注册
-	if admin.CheckUserRepeat(registerForm.Username, registerForm.Email) {
+	if models.CheckUserRepeat(registerForm.Username, registerForm.Email) {
 		c.Response(107, "", nil) //用户名或邮箱已被注册
 	}
 	//创建用户数据
-	var UserData admin.UserModel
+	var UserData models.UserModel
 	var uid int64
 	UserData.UserLogin = registerForm.Username
 	UserData.UserPass = utils.Encryption(registerForm.Password) //加密密码
@@ -88,7 +88,7 @@ func (c *LoginController) Register() {
 	UserData.CreateTime = time.Now().Unix()                     //管理员类型
 	UserData.UpdateTime = UserData.CreateTime                   //管理员类型
 	UserData.UserStatus = 1                                     //用户状态
-	uid = admin.CreateUser(&UserData)
+	uid = models.CreateUser(&UserData)
 	if uid != 0 {
 		logs.Info(uid)
 		c.Response(110, "", nil) //注册成功
