@@ -60,7 +60,6 @@ func ValidateUserToken(tokenString string) (bool, *MyCustomClaims) {
 	}
 	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
 		// 解析成功
-		logs.Debug("%v %v", claims.User, claims.StandardClaims.ExpiresAt)
 		logs.Debug("token will be expired at ", time.Unix(claims.StandardClaims.ExpiresAt, 0))
 		return true, claims
 	} else {

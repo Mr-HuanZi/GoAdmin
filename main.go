@@ -5,6 +5,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
 	_ "github.com/go-sql-driver/mysql"
+	"go-admin/filter"
 	_ "go-admin/routers"
 	"go-admin/utils"
 	"log"
@@ -28,6 +29,8 @@ func init() {
 	utils.CORS()
 	// 文件上传初始化
 	initFileUpdateDriver()
+	// 执行过滤器
+	filter.ExecAdminFilter()
 }
 
 func main() {

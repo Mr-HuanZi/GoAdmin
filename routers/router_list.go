@@ -41,7 +41,7 @@ var RouterListInterface = []RouterList{
 	{
 		Router:     "/article/list",
 		Controller: &cms.ArticleController{},
-		Method:     "get,post:List",
+		Method:     "get:List",
 	},
 	// 文章发布
 	{

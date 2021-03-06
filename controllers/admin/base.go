@@ -9,7 +9,6 @@ import (
 	"go-admin/models/admin"
 	"go-admin/utils"
 	"strconv"
-	"strings"
 )
 
 type BaseController struct {
@@ -21,25 +20,8 @@ var StatusCodeInstance utils.StatusCode
 
 // 基类初始化方法，每次执行都会被调用
 func (base *BaseController) Prepare() {
-	// 日志开始
-	logs.Info("\r\n\r\n")
-	logs.Info(base.Ctx.Input.IP(), "["+base.Ctx.Input.Method()+"]", base.Ctx.Input.URI())
 	//验证登录
-	var checkLogin = true
-	var ruleExclude []string
-	ruleExcludeConf, _ := beego.AppConfig.String("rule::ruleExclude")
-	if i := strings.Index(ruleExcludeConf, ","); i != -1 {
-		ruleExclude = strings.Split(ruleExcludeConf, ",")
-	} else {
-		ruleExclude = append(ruleExclude, ruleExcludeConf)
-	}
-	for _, value := range ruleExclude {
-		if strings.ToUpper(value) == strings.ToUpper(base.Ctx.Request.RequestURI) {
-			checkLogin = false
-			break
-		}
-	}
-	if checkLogin {
+	if !utils.InRuleExclude(base.Ctx.Request.RequestURI) {
 		// 先从HTTP头中获取Authorization
 		Authorization := base.Ctx.Input.Header("Authorization")
 		if Authorization == "" {
@@ -78,7 +60,6 @@ func (base *BaseController) Prepare() {
 
 // 执行完相应的 HTTP Method 方法之后执行
 func (base *BaseController) Finish() {
-	go utils.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
 }
 
 func (base *BaseController) Response(code int, msg string, data interface{}) {
@@ -91,8 +72,6 @@ func (base *BaseController) Response(code int, msg string, data interface{}) {
 	base.Data["json"] = &statusCode
 	_ = base.ServeJSON()
 	if code != 100 && code != 200 {
-		// 调用StopRun方法后不会再执行Finish方法，因此这里需要手动调用
-		go utils.WriteSysLogs(1, "RequestInput", base.Ctx.Input, "")
 		base.StopRun()
 	}
 }
