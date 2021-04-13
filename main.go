@@ -23,8 +23,6 @@ func init() {
 	initLogsDriver()
 	// 初始化ORM
 	initOrmDriver()
-	//初始化session
-	beego.BConfig.WebConfig.Session.SessionOn = true
 	//跨域处理
 	utils.CORS()
 	// 文件上传初始化

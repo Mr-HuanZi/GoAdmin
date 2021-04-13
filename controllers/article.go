@@ -59,7 +59,9 @@ func (c *ArticleController) List() {
 	logs.Info(ArticleListSearchS)
 
 	//获取每页记录条数, 页码, 计算页码偏移量
-	ArticleListSearchS.Limit, ArticleListSearchS.Page, offset = c.Paginate(ArticleListSearchS.Page, ArticleListSearchS.Limit)
+	limit, _ := c.GetInt("limit")
+	page, _ := c.GetInt("page")
+	limit, page, offset = c.Paginate(page, limit)
 
 	o := orm.NewOrm()
 	qs := o.QueryTable(Article)
