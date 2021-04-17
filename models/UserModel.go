@@ -177,7 +177,7 @@ func AddUserLoginErrorSum(user *UserModel) {
 		num int64
 	)
 	o := orm.NewOrm()
-	if user.ErrorSum < 3 {
+	if user.ErrorSum <= 3 {
 		// 登录错误次数小于3次，只记录错误次数
 		num, err = o.QueryTable(new(UserModel)).Filter("id", user.Id).Update(orm.Params{
 			"ErrorSum": orm.ColValue(orm.ColAdd, 1),

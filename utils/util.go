@@ -90,13 +90,13 @@ func Md5File(f multipart.File) string {
 
 func BytesToString(b []byte) string {
 	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	sh := reflect.StringHeader{bh.Data, bh.Len}
+	sh := reflect.StringHeader{Data: bh.Data, Len: bh.Len}
 	return *(*string)(unsafe.Pointer(&sh))
 }
 
 func StringToBytes(s string) []byte {
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	bh := reflect.SliceHeader{sh.Data, sh.Len, 0}
+	bh := reflect.SliceHeader{Data: sh.Data, Len: sh.Len}
 	return *(*[]byte)(unsafe.Pointer(&bh))
 }
 

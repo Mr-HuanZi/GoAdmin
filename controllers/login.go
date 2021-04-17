@@ -52,8 +52,6 @@ func (c *LoginController) Login() {
 		models.UpdateUserLoginInfo(uid, c.Ctx.Input.IP())
 		c.Ctx.SetCookie("Authorization", token, 7200, "/", "", false, true)
 		c.Ctx.Output.Header("Authorization", token)
-		//记录session
-		c.SetSession("UserId", uid)
 	}
 	c.Response(code, "", nil)
 }
