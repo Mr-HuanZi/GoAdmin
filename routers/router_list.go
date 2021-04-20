@@ -26,11 +26,6 @@ var RouterListInterface = []RouterList{
 		Method:     "post:Login",
 	},
 	{
-		Router:     "/login/test",
-		Controller: &controllers.LoginController{},
-		Method:     "post:Test",
-	},
-	{
 		Router:     "/register",
 		Controller: &controllers.LoginController{},
 		Method:     "post:Register",
